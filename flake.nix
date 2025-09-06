@@ -82,7 +82,10 @@
           env = {
             UV_PYTHON           = python.interpreter;  # force nixpkgs python
             UV_PYTHON_DOWNLOADS = "never";             # don’t auto-download cpython
-            NIX_DEVELOP_SHELL = pkgs.zsh + "/bin/zsh";
+            NIX_DEVELOP_SHELL = "${pkgs.zsh}/bin/zsh";
+
+            # Some setups only respect NIX_BUILD_SHELL; set both to be safe:
+            NIX_BUILD_SHELL = "${pkgs.zsh}/bin/zsh";
             DYLD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
               pkgs.stdenv.cc.cc.lib
               pkgs.libz
