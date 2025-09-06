@@ -78,7 +78,11 @@
         # A) network-friendly shell that lets uv mutate .venv
         impure = pkgs.mkShell {
           packages = [ python pkgs.uv ];
-          shell = pkgs.zsh;
+          shell = pkgs.writeShellScript "enter-zsh" ''
+            #!/usr/bin/env bash
+            # Run the mkShell hook then exec into your default shell as a login shell
+            exec "${SHELL:-/bin/zsh}" -l
+          '';
 
           env = {
             UV_PYTHON           = python.interpreter;  # force nixpkgs python
