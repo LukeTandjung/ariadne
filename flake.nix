@@ -78,6 +78,7 @@
         # A) network-friendly shell that lets uv mutate .venv
         impure = pkgs.mkShell {
           packages = [ python pkgs.uv ];
+          shell = pkgs.zsh;
 
           env = {
             UV_PYTHON           = python.interpreter;  # force nixpkgs python
