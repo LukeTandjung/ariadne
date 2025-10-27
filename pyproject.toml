@@ -1,7 +1,0 @@
-[project]
-name = "MLX_Transformers"
-version = "0.1.0"
-requires-python = ">=3.12"
-dependencies = [
-    "mlx>=0.29.0",
-]
