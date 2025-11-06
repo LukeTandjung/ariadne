@@ -1,8 +1,16 @@
-<img src="./assets/sakhal_service_logo.jpeg" align="left" width="200" alt="Sakhal logo of a deer and a dead tree">
+<table>
+<tr>
+<td width="200">
+  <img src="./assets/sakhal_service_logo.jpeg" alt="Sakhal logo of a deer and a dead tree" width="200">
+</td>
+<td>
 
-Sakhal is a batteries-included AI agent framework that handles everything on the stack. This means it handles fine-tuning, open source model deployment, and continuous improvement feedback loops, with planned support for Python, Typescript, and Rust. It aims to provide
+Sakhal is a batteries-included low-level AI agent framework that handles everything on the stack - from fine-tuning, deployment, and continuous feedback, with support for Python and eventual support for Typescript, and Rust. It aims to provide:
+
 - Full type-safety and observability from error accumulation.
 - Composability for ease of evaluation and unit testing.
 - An intuitive API that supports all types of multi-agent architecture.
 
-<br clear="left"/>
+</td>
+</tr>
+</table>
