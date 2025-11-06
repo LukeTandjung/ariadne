@@ -4,14 +4,11 @@ Sakhal is a batteries-included fullstack AI agent framework. This means it handl
 
 Planned language support includes Python, Typescript, and Rust.
 
-*NOTE: THIS REPOSITORY IS A WORK IN PROGRESS AND IS NOT READY FOR SERIOUS PRODUCTION USE YET*
+**NOTE: THIS REPOSITORY IS A WORK IN PROGRESS AND IS NOT READY FOR SERIOUS PRODUCTION USE YET**
 
 <br clear="left">
 
 It aims to provide
-<ul style="margin-left: 20px;">
-  <li>Full type-safety and observability from error accumulation.</li>
-  <li>Composability for ease of evaluation and unit testing.</li>
-  <li>An intuitive API that supports all types of multi-agent architecture
-</li>
-<ul>
+ - Full type-safety and observability from error accumulation.
+ - Composability for ease of evaluation and unit testing.
+ - An intuitive graph API that supports all types of multi-agent architecture
