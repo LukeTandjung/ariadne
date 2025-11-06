@@ -2,9 +2,9 @@
 
 Sakhal is a batteries-included AI agent framework that handles everything on the stack. This means it handles fine-tuning, open source model deployment, and continuous improvement feedback loops, with planned support for Python, Typescript, and Rust.
 
-<br clear="left"/>
-
 It aims to provide
-- Full type-safety and observability from error accumulation.
-- Composability for ease of evaluation and unit testing.
-- An intuitive API that supports all types of multi-agent architecture.
+  - Full type-safety and observability from error accumulation.
+  - Composability for ease of evaluation and unit testing.
+  - An intuitive API that supports all types of multi-agent architecture.
+
+<br clear="left"/>
