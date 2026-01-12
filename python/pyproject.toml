@@ -1,7 +1,0 @@
-[project]
-name = "sakhal"
-version = "0.1.0"
-requires-python = ">=3.12"
-dependencies = [
-    "returns>=0.26.0",
-]
