@@ -12,3 +12,39 @@ It aims to provide
  - Full type-safety and observability from error accumulation.
  - Composability for ease of evaluation and unit testing.
  - An intuitive graph API that supports all types of multi-agent architecture
+
+## Development Setup
+
+### Initial Setup
+
+```bash
+git clone git@github.com:your-username/sakhal.git
+cd sakhal
+
+# Add Effect as a remote for syncing AI packages
+git remote add effect https://github.com/Effect-TS/effect.git
+```
+
+### Syncing Effect AI Packages
+
+This repo includes a fork of the Effect AI packages. To pull upstream changes:
+
+```bash
+# Shallow fetch (only latest commit, much faster)
+git fetch effect --depth=1
+
+# Pull updates for each package
+git subtree pull --prefix=packages/ai effect main --squash
+git subtree pull --prefix=packages/ai-openai effect main --squash
+git subtree pull --prefix=packages/ai-anthropic effect main --squash
+```
+
+### Pushing Changes
+
+Your changes push to this repo, not Effect:
+
+```bash
+git push origin master
+```
+
+The `effect` remote is read-only for syncing upstream changes.
