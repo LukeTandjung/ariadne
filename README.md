@@ -34,9 +34,9 @@ This repo includes a fork of the Effect AI packages. To pull upstream changes:
 git fetch effect --depth=1
 
 # Pull updates for each package
-git subtree pull --prefix=packages/ai effect main --squash
-git subtree pull --prefix=packages/ai-openai effect main --squash
-git subtree pull --prefix=packages/ai-anthropic effect main --squash
+git subtree pull --prefix=packages/ai/ai effect main --squash
+git subtree pull --prefix=packages/ai/openai effect main --squash
+git subtree pull --prefix=packages/ai/anthropic effect main --squash
 ```
 
 ### Pushing Changes
