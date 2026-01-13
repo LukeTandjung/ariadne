@@ -1,0 +1,25 @@
+{
+  "name": "@src/ariadne",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A composable, structured, effectful agent SDK built off the backs of the Dedalus Labs backend",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bunup",
+    "dev": "bunup --watch",
+    "test": "bun test"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukeTandjung/ariadne.git"
+  },
+  "homepage": "https://github.com/LukeTandjung/ariadne#readme"
+}

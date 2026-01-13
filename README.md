@@ -1,50 +1,47 @@
-<img src="./assets/sakhal_service_logo.jpeg" align="left" width="200" alt="Sakhal logo of a deer and a dead tree" style="margin-right: 20px; margin-bottom: 10px;">
+<img src="./assets/ariadne_service_logo.png" align="left" width="200" alt="Ariadne logo of a spool of thread" style="margin-right: 20px; margin-bottom: 10px;">
 
-Sakhal is a batteries-included fullstack AI agent framework. This means it handles fine-tuning, open source model deployment, and continuous improvement feedback loops
-
-Planned language support includes Python, Typescript, and Rust.
-
-**NOTE: THIS REPOSITORY IS A WORK IN PROGRESS AND IS NOT READY FOR SERIOUS PRODUCTION USE YET**
+Ariadne is an agent SDK, built from the API surface of Effect-AI and the Dedalus Labs backend.
 
 <br clear="left">
 
 It aims to provide
  - Full type-safety and observability from error accumulation.
  - Composability for ease of evaluation and unit testing.
- - An intuitive graph API that supports all types of multi-agent architecture
 
-## Development Setup
-
-### Initial Setup
+## Installation
 
 ```bash
-git clone git@github.com:your-username/sakhal.git
-cd sakhal
-
-# Add Effect as a remote for syncing AI packages
-git remote add effect https://github.com/Effect-TS/effect.git
+bun install ariadne
 ```
 
-### Syncing Effect AI Packages
-
-This repo includes a fork of the Effect AI packages. To pull upstream changes:
+## Development
 
 ```bash
-# Shallow fetch (only latest commit, much faster)
-git fetch effect --depth=1
+# Install dependencies
+bun install
 
-# Pull updates for each package
-git subtree pull --prefix=packages/ai/ai effect main --squash
-git subtree pull --prefix=packages/ai/openai effect main --squash
-git subtree pull --prefix=packages/ai/anthropic effect main --squash
+# Build
+bun run build
+
+# Develop with watch mode
+bun run dev
+
+# Run tests
+bun run test
+
+# Lint and format
+bun run lint
+bun run format
 ```
 
-### Pushing Changes
+## Effect AI Packages
 
-Your changes push to this repo, not Effect:
+This repo includes a fork of the [Effect AI packages](https://github.com/Effect-TS/effect/tree/main/packages/ai). Upstream changes are monitored and selectively merged as needed.
 
-```bash
-git push origin master
-```
+## Contributing
 
-The `effect` remote is read-only for syncing upstream changes.
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
+
+## License
+
+MIT
