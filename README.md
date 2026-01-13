@@ -1,6 +1,12 @@
 <img src="./assets/ariadne_service_logo.png" align="left" width="200" alt="Ariadne logo of a spool of thread" style="margin-right: 20px; margin-bottom: 10px;">
 
-Ariadne is an agent SDK, built from the API surface of Effect-AI and the Dedalus Labs backend.
+
+> In the myths, Dedalus was the master craftsman that gave men powerful wings.
+> Ariadne was the clever problem-solver that threaded the way out of his labyrinth.
+> Together, they made the impossible navigable.
+
+Ariadne brings composable, structured workflows to Dedalus Labs' agent platform,
+built off the backs of Effect and Effect-AI.
 
 <br clear="left">
 
