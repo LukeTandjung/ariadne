@@ -7,10 +7,25 @@ This document refines the original acceptance criteria with implementation guida
 ## Table of Contents
 
 1. [DedalusClient - HTTP Client Layer](#1-dedalusclient---http-client-layer)
+   - 1.1 Dual Authentication
+   - 1.2 BYOK Support
+   - 1.3 SDK Headers
+   - 1.4 Environmental Switching
+   - 1.5 Error Handling
+   - 1.6 Case Conversion
 2. [DedalusLanguageModel - Provider Implementation](#2-dedaluslanguagemodel---provider-implementation)
 3. [MCP Server Integration](#3-mcp-server-integration)
 4. [Dynamic Model Routing](#4-dynamic-model-routing)
 5. [Dedalus Features via Effect Primitives](#5-dedalus-features-via-effect-primitives)
+   - 5.1 Retry/Backoff via ExecutionPlan
+   - 5.2 State Management
+   - 5.3 Timeout Configuration
+   - 5.4 Idempotency Keys
+   - 5.5 Max Steps
+   - 5.6 Resource Management
+   - 5.7 Streaming Tool Call Accumulation
+   - 5.8 Runner vs Effect Chat Module
+6. [Streaming Structured Output](#6-streaming-structured-output)
 
 ---
 
@@ -99,7 +114,40 @@ HttpClientRequest.setHeaders({
 })
 ```
 
-### 1.3 Environmental Switching
+### 1.3 SDK Headers
+
+**Dedalus SDK Pattern** (from `dedalus-sdk-typescript/src/client.ts`):
+
+The SDK automatically sends these headers with every request:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `Accept` | `application/json` | Content negotiation |
+| `User-Agent` | `Dedalus/JS <VERSION>` | Client identification |
+| `X-SDK-Version` | `1.0.0` | SDK version tracking |
+| `X-Stainless-Retry-Count` | `<count>` | Retry attempt number |
+| `X-Stainless-Timeout` | `<seconds>` | Request timeout value |
+| `Idempotency-Key` | `<uuid>` | Non-GET request deduplication |
+
+**Effect-AI Implementation:**
+
+```typescript
+HttpClient.mapRequest((request) =>
+  request.pipe(
+    HttpClientRequest.setHeaders({
+      "Accept": "application/json",
+      "User-Agent": `effect-ai-dedalus/${version}`,
+      "X-SDK-Version": "1.0.0",
+    }),
+    // Add idempotency key for non-GET requests
+    request.method !== "GET"
+      ? HttpClientRequest.setHeader("Idempotency-Key", yield* Random.randomUUID)
+      : identity
+  )
+)
+```
+
+### 1.4 Environmental Switching
 
 **Dedalus SDK Pattern**:
 - Production: `https://api.dedaluslabs.ai`
@@ -129,7 +177,7 @@ export const layerConfig = (options: {
   )
 ```
 
-### 1.4 Dedalus-Specific Error Handling
+### 1.5 Dedalus-Specific Error Handling
 
 **Dedalus SDK Error Codes** (from `dedalus-sdk-typescript/src/core/error.ts`):
 
@@ -271,6 +319,46 @@ export const isRetryable = (error: DedalusError): boolean =>
     Match.tag("DedalusInternalServerError", () => true),
     Match.orElse(() => false)
   )
+```
+
+### 1.6 Case Conversion (camelCase → snake_case)
+
+**Dedalus SDK Pattern** (from `dedalus-sdk-typescript/src/lib/case-conversion.ts`):
+
+The SDK automatically converts TypeScript camelCase to API snake_case, but **preserves JSON schemas** to avoid breaking schema property names.
+
+| Input | Output | Notes |
+|-------|--------|-------|
+| `maxTokens` | `max_tokens` | Standard conversion |
+| `responseFormat` | `response_format` | Standard conversion |
+| `additionalProperties` (in schema) | `additionalProperties` | **Preserved** - not converted |
+| `__proto__`, `constructor`, `prototype` | *(skipped)* | Prototype pollution protection |
+
+**Why this matters**: Properties like `additionalProperties` in JSON schemas would break if converted to `additional_properties`.
+
+**Effect-AI Implementation Options:**
+
+1. **Option A**: Send snake_case directly (recommended for simplicity)
+2. **Option B**: Implement smart conversion that preserves schema paths
+
+```typescript
+// Option A: Use snake_case in request building
+const request = {
+  model: config.model,
+  max_tokens: config.maxTokens,
+  response_format: {
+    type: "json_schema",
+    json_schema: {
+      schema: jsonSchema  // Schema properties preserved as-is
+    }
+  }
+}
+
+// Option B: Smart conversion (if needed)
+const convertToSnakeCase = (obj: unknown, preservePaths: Array<string>): unknown => {
+  // Skip conversion for keys in preservePaths (e.g., "response_format.json_schema.schema")
+  // Skip __proto__, constructor, prototype for security
+}
 ```
 
 ---
@@ -689,6 +777,8 @@ const requestWithTimeout = <A, E, R>(
 
 **Dedalus SDK Pattern**: Auto-generates UUID for non-GET requests.
 
+> **Note**: The Dedalus SDK uses plain UUIDs without a prefix. For consistency, use plain UUIDs rather than prefixed ones.
+
 **Effect Implementation:**
 
 ```typescript
@@ -698,7 +788,7 @@ const withIdempotencyKey = (
   request: HttpClientRequest.HttpClientRequest
 ): Effect.Effect<HttpClientRequest.HttpClientRequest> =>
   Effect.map(Random.randomUUID, (uuid) =>
-    HttpClientRequest.setHeader(request, "Idempotency-Key", `effect-${uuid}`)
+    HttpClientRequest.setHeader(request, "Idempotency-Key", uuid)
   )
 ```
 
@@ -744,7 +834,92 @@ const streamWithCleanup = (
   )
 ```
 
----
+### 5.7 Streaming Tool Call Accumulation
+
+**Dedalus SDK Pattern** (from `dedalus-sdk-typescript/src/lib/runner/streaming.ts`):
+
+When streaming, tool calls arrive as deltas that must be accumulated by index to build complete tool call objects.
+
+**Delta Format:**
+```typescript
+// Each chunk may contain partial tool call data
+{
+  choices: [{
+    delta: {
+      tool_calls: [{
+        index: 0,           // Position in array
+        id: "call_abc",     // Only in first delta for this index
+        type: "function",   // Only in first delta
+        function: {
+          name: "get_weather",      // Only in first delta
+          arguments: "{\"city\":"   // Accumulates across deltas
+        }
+      }]
+    }
+  }]
+}
+```
+
+**Effect-AI Implementation:**
+
+```typescript
+import * as Stream from "effect/Stream"
+
+interface ToolCallAccumulator {
+  readonly id: string
+  readonly type: string
+  readonly name: string
+  readonly arguments: string
+}
+
+// Accumulate tool call deltas by index
+const accumulateToolCalls = Stream.mapAccum(
+  new Map<number, ToolCallAccumulator>(),
+  (acc, chunk) => {
+    const deltas = chunk.choices[0]?.delta?.tool_calls ?? []
+    for (const delta of deltas) {
+      const existing = acc.get(delta.index)
+      if (existing) {
+        // Append to existing tool call
+        acc.set(delta.index, {
+          ...existing,
+          arguments: existing.arguments + (delta.function?.arguments ?? "")
+        })
+      } else {
+        // New tool call
+        acc.set(delta.index, {
+          id: delta.id ?? "",
+          type: delta.type ?? "function",
+          name: delta.function?.name ?? "",
+          arguments: delta.function?.arguments ?? ""
+        })
+      }
+    }
+    return [acc, chunk]
+  }
+)
+
+// Extract completed tool calls when stream ends
+const extractToolCalls = (acc: Map<number, ToolCallAccumulator>): Array<ToolCallPart> =>
+  Array.from(acc.values()).map(tc => ({
+    type: "tool-call",
+    id: tc.id,
+    name: tc.name,
+    params: JSON.parse(tc.arguments)
+  }))
+```
+
+### 5.8 Runner vs Effect Chat Module
+
+**Important**: The Dedalus SDK includes a `DedalusRunner` class (`src/lib/runner/runner.ts`) that handles multi-turn conversations with automatic tool execution.
+
+**You do NOT need to wrap the Runner.** In Effect-AI, this functionality is provided by:
+
+1. **`Chat` module** - Manages conversation history via `Ref<Prompt>`
+2. **`ExecutionPlan`** - Handles retries and fallbacks
+3. **Tool execution loop** - Built into `LanguageModel.generateText` when tools are provided
+
+The Effect-AI pattern is more composable and doesn't require a separate runner abstraction.
 
 ---
 
@@ -912,8 +1087,11 @@ const program = Effect.gen(function*() {
 ### Phase 1: DedalusClient
 - [ ] Implement dual authentication (Bearer + X-API-Key)
 - [ ] Add BYOK header support
+- [ ] Add SDK headers (X-SDK-Version, User-Agent)
+- [ ] Add idempotency key generation for non-GET requests
 - [ ] Add environment switching (prod/dev URLs)
 - [ ] Implement Dedalus-specific error types (for ExecutionPlan `while` predicates)
+- [ ] Handle case conversion (use snake_case directly, preserve JSON schema properties)
 
 ### Phase 2: DedalusLanguageModel
 - [ ] Create `Config` context tag
@@ -921,6 +1099,7 @@ const program = Effect.gen(function*() {
 - [ ] Build request serialization (messages, tools)
 - [ ] Build response deserialization
 - [ ] Add streaming support via SSE
+- [ ] Implement tool call delta accumulation for streaming
 - [ ] Add `streamObject` support (see Section 6 - Streaming Structured Output)
 
 ### Phase 3: MCP Integration
@@ -940,3 +1119,16 @@ const program = Effect.gen(function*() {
 - [ ] Document ExecutionPlan usage for retries/fallbacks
 - [ ] Document Ref usage for state management (via Chat module)
 - [ ] Document Scope for resource management
+
+---
+
+## Appendix: Key Differences from Dedalus SDK
+
+| Aspect | Dedalus SDK | Effect-AI Extension |
+|--------|-------------|---------------------|
+| Multi-turn conversations | `DedalusRunner` class | `Chat` module + tool loop |
+| Retry/backoff | HTTP client level | `ExecutionPlan` |
+| State management | `RunResult` object | `Ref<Prompt>` in Chat |
+| Streaming accumulation | `accumulateToolCalls()` | `Stream.mapAccum` |
+| Case conversion | Automatic with schema preservation | Manual (use snake_case) |
+| Idempotency keys | Plain UUID | Plain UUID |

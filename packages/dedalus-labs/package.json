@@ -1,0 +1,17 @@
+{
+    "name": "@src/dedalus-labs",
+    "module": "index.ts",
+    "type": "module",
+    "dependencies": {
+        "@src/ariadne": "workspace:*",
+        "@effect/experimental": "^0.58.0",
+        "@effect/platform": "^0.94.1",
+        "effect": "^3.19.14"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}

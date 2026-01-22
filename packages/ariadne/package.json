@@ -1,25 +1,35 @@
 {
-  "name": "@src/ariadne",
-  "version": "0.1.0",
-  "type": "module",
-  "description": "A composable, structured, effectful agent SDK built off the backs of the Dedalus Labs backend",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "bunup",
-    "dev": "bunup --watch",
-    "test": "bun test"
-  },
-  "dependencies": {},
-  "devDependencies": {},
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/LukeTandjung/ariadne.git"
-  },
-  "homepage": "https://github.com/LukeTandjung/ariadne#readme"
+    "name": "@src/ariadne",
+    "version": "0.1.0",
+    "type": "module",
+    "description": "A composable, structured, effectful agent SDK built off the backs of the Dedalus Labs backend",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts",
+        "./*": "./src/*.ts",
+        "./internal/*": null
+    },
+    "files": ["dist"],
+    "scripts": {
+        "build": "bunup",
+        "dev": "bunup --watch",
+        "test": "bun test"
+    },
+    "dependencies": {
+        "@effect/experimental": "^0.58.0",
+        "@effect/platform": "^0.94.1",
+        "@effect/rpc": "^0.73.0",
+        "effect": "^3.19.14",
+        "find-my-way-ts": "^0.1.6"
+    },
+    "devDependencies": {},
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LukeTandjung/ariadne.git"
+    },
+    "homepage": "https://github.com/LukeTandjung/ariadne#readme"
 }
