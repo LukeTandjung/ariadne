@@ -12,6 +12,7 @@
         "@commitlint/cli": "^19.8.0",
         "@commitlint/config-conventional": "^19.8.0",
         "@effect/eslint-plugin": "^0.3.2",
+        "@tim-smart/openapi-gen": "^0.4.13",
         "@types/bun": "^1.3.6",
         "@typescript-eslint/eslint-plugin": "^8.53.1",
         "@typescript-eslint/parser": "^8.53.1",
@@ -314,6 +315,8 @@
     "@src/dedalus-labs": ["@src/dedalus-labs@workspace:packages/dedalus-labs"],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
+
+    "@tim-smart/openapi-gen": ["@tim-smart/openapi-gen@0.4.13", "", { "dependencies": { "yaml": "^2.8.0" }, "bin": { "openapi-gen": "main.js" } }, "sha512-yn/4Tp6Or5JA2/VNPLKtm9ib17PZxmJGyEq+vtcmAch5qG2PAJLvuzuoAwYRBMN9GR8Cb/W5qO6eIHg0AdYL0Q=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
