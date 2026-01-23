@@ -6,29 +6,19 @@ export * as Generated from "./Generated.js";
 /**
  * @since 1.0.0
  */
-export * as OpenAiClient from "./OpenAiClient.js";
+export * as DedalusClient from "./DedalusClient.js";
 
 /**
  * @since 1.0.0
  */
-export * as OpenAiConfig from "./OpenAiConfig.js";
+export * as DedalusConfig from "./DedalusConfig.js";
 
 /**
  * @since 1.0.0
  */
-export * as OpenAiEmbeddingModel from "./OpenAiEmbeddingModel.js";
+export * as DedalusEmbeddingModel from "./DedalusEmbeddingModel.js";
 
 /**
  * @since 1.0.0
  */
-export * as OpenAiLanguageModel from "./OpenAiLanguageModel.js";
-
-/**
- * @since 1.0.0
- */
-export * as OpenAiTelemetry from "./OpenAiTelemetry.js";
-
-/**
- * @since 1.0.0
- */
-export * as OpenAiTool from "./OpenAiTool.js";
+export * as DedalusLanguageModel from "./DedalusLanguageModel.js";
