@@ -103,8 +103,8 @@ export const make = (options: {
     const baseUrl =
       options.apiUrl ??
       ((options.environment ?? "production") === "production"
-        ? "https://api.dedaluslabs.ai/v1"
-        : "http://localhost:8080/v1");
+        ? "https://api.dedaluslabs.ai"
+        : "http://localhost:8080");
 
     const httpClient = (yield* HttpClient.HttpClient).pipe(
       HttpClient.mapRequest((request) => {
