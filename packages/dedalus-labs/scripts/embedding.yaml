@@ -1,0 +1,262 @@
+openapi: 3.1.0
+info:
+  title: Dedalus API
+  description: >-
+    MCP gateway for AI agents. Mix-and-match any model with any tool from our
+    marketplace.
+
+
+    ## Authentication
+
+    Use Bearer token or X-API-Key header authentication:
+
+    ```
+
+    Authorization: Bearer your-api-key-here
+
+    ```
+
+    ```
+
+    x-api-key: your-api-key-here
+
+    ```
+
+
+    ## Available Endpoints
+
+    - **GET /v1/models**: list available models
+
+    - **POST /v1/chat/completions**: Chat completions with MCP tools
+
+    - **GET /health**: Service health check
+  version: 0.1.0a10
+servers:
+  - url: https://api.dedaluslabs.ai
+    description: Production server
+security: []
+paths:
+  /v1/embeddings:
+    post:
+      tags:
+        - v1
+        - v1
+      summary: Create Embeddings
+      description: Create embeddings using the configured provider.
+      operationId: create_embeddings_v1_embeddings_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmbeddingRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEmbeddingResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - Bearer: []
+components:
+  schemas:
+    CreateEmbeddingRequest:
+      properties:
+        input:
+          anyOf:
+            - type: string
+            - items:
+                type: string
+              type: array
+              maxItems: 2048
+              minItems: 1
+            - items:
+                type: integer
+              type: array
+              maxItems: 2048
+              minItems: 1
+            - items:
+                items:
+                  type: integer
+                type: array
+                minItems: 1
+              type: array
+              maxItems: 2048
+              minItems: 1
+          title: Input
+          description: >-
+            Input text to embed, encoded as a string or array of tokens. To
+            embed multiple inputs in a single request, pass an array of strings
+            or array of token arrays. The input must not exceed the max input
+            tokens for the model (8192 tokens for all embedding models), cannot
+            be an empty string, and any array must be 2048 dimensions or less.
+            [Example Python
+            code](https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken)
+            for counting tokens. In addition to the per-input token limit, all
+            embedding  models enforce a maximum of 300,000 tokens summed across
+            all inputs in a  single request.
+          x-order: 0
+        model:
+          anyOf:
+            - type: string
+            - type: string
+              enum:
+                - openai/text-embedding-ada-002
+                - openai/text-embedding-3-small
+                - openai/text-embedding-3-large
+                - google/text-embedding-004
+          title: Model
+          description: >-
+            ID of the model to use. See our [Model
+            Providers](/sdk/guides/providers) for available embedding models.
+          x-order: 1
+        encoding_format:
+          type: string
+          enum:
+            - float
+            - base64
+          title: Encoding Format
+          description: >-
+            The format to return the embeddings in. Can be either `float` or
+            [`base64`](https://pypi.org/project/pybase64/).
+          default: float
+          x-order: 2
+        dimensions:
+          type: integer
+          minimum: 1
+          title: Dimensions
+          description: >-
+            The number of dimensions the resulting output embeddings should
+            have. Only supported in `text-embedding-3` and later models.
+          x-order: 3
+        user:
+          type: string
+          title: User
+          description: >-
+            A unique identifier representing your end-user, which can help
+            OpenAI to monitor and detect abuse. [Learn
+            more](https://platform.openai.com/docs/guides/safety-best-practices#end-user-ids).
+          x-order: 4
+      additionalProperties: false
+      type: object
+      required:
+        - input
+        - model
+      title: CreateEmbeddingRequest
+      description: >-
+        Fields:
+
+        - input (required): str | Annotated[list[str], MinLen(1), MaxLen(2048)]
+        | Annotated[list[int], MinLen(1), MaxLen(2048)] |
+        Annotated[list[Annotated[list[int], MinLen(1)]], MinLen(1),
+        MaxLen(2048)]
+
+        - model (required): str | Literal['openai/text-embedding-ada-002',
+        'openai/text-embedding-3-small', 'openai/text-embedding-3-large',
+        'google/text-embedding-004']
+
+        - encoding_format (optional): Literal['float', 'base64']
+
+        - dimensions (optional): int
+
+        - user (optional): str
+    CreateEmbeddingResponse:
+      properties:
+        object:
+          type: string
+          const: list
+          title: Object
+          description: Object type, always 'list'
+          default: list
+        data:
+          items:
+            $ref: '#/components/schemas/Embedding'
+          type: array
+          title: Data
+          description: List of embedding objects
+        model:
+          type: string
+          title: Model
+          description: The model used for embeddings
+        usage:
+          additionalProperties:
+            type: integer
+          type: object
+          title: Usage
+          description: Usage statistics (prompt_tokens, total_tokens)
+      type: object
+      required:
+        - data
+        - model
+        - usage
+      title: CreateEmbeddingResponse
+      description: Response from embeddings endpoint.
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Embedding:
+      properties:
+        object:
+          type: string
+          const: embedding
+          title: Object
+          description: Object type, always 'embedding'
+          default: embedding
+        embedding:
+          anyOf:
+            - items:
+                type: number
+              type: array
+            - type: string
+          title: Embedding
+          description: The embedding vector (float array or base64 string)
+        index:
+          type: integer
+          title: Index
+          description: Index of the embedding in the list
+      type: object
+      required:
+        - embedding
+        - index
+      title: Embedding
+      description: Single embedding object.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+  securitySchemes:
+    Bearer:
+      type: http
+      description: API key authentication using Bearer token
+      scheme: bearer
+
