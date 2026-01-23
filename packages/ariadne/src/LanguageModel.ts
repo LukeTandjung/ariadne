@@ -62,6 +62,7 @@ import type { Span } from "effect/Tracer";
 import type { Concurrency, Mutable, NoExcessProperties } from "effect/Types";
 import * as AiError from "./AiError.js";
 import { IdGenerator, defaultIdGenerator } from "./IdGenerator.js";
+import type * as McpRegistry from "./McpRegistry.js";
 import * as Prompt from "./Prompt.js";
 import * as Response from "./Response.js";
 import type { SpanTransformer } from "./Telemetry.js";
@@ -220,6 +221,29 @@ export interface GenerateTextOptions<Tools extends Record<string, Tool.Any>> {
      *      instead of having the framework handle tool call resolution
      */
     readonly disableToolCallResolution?: boolean | undefined;
+
+    /**
+     * A list of hosted MCP (Model Context Protocol) servers to make available
+     * for server-side tool execution.
+     *
+     * These are MCP servers hosted by the AI provider (e.g., Dedalus) that will
+     * be connected to and executed server-side. The tools from these servers
+     * are discovered and executed by the provider, not the client.
+     *
+     * @example
+     * ```ts
+     * import { McpRegistry, LanguageModel } from "@effect/ai"
+     *
+     * const response = yield* LanguageModel.generateText({
+     *   prompt: "Search for Effect TypeScript",
+     *   mcpServers: [
+     *     McpRegistry.marketplace("dedalus-labs/brave-search"),
+     *     McpRegistry.url("https://my-mcp.example.com"),
+     *   ],
+     * })
+     * ```
+     */
+    readonly mcpServers?: ReadonlyArray<McpRegistry.McpServerSpec> | undefined;
 }
 
 /**
@@ -559,6 +583,13 @@ export interface ProviderOptions {
     readonly toolChoice: ToolChoice<any>;
 
     /**
+     * A list of hosted MCP servers to make available for server-side tool
+     * execution. Providers that support hosted MCP will connect to these
+     * servers and execute tools on your behalf.
+     */
+    readonly mcpServers: ReadonlyArray<McpRegistry.McpServerSpec>;
+
+    /**
      * The span to use to trace interactions with the large language model.
      */
     readonly span: Span;
@@ -654,6 +685,7 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
                             tools: [],
                             toolChoice: "none",
                             responseFormat: { type: "text" },
+                            mcpServers: options.mcpServers ?? [],
                             span,
                         };
                         const content = yield* generateContent(
@@ -722,6 +754,7 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
                                 objectName,
                                 schema,
                             },
+                            mcpServers: options.mcpServers ?? [],
                             span,
                         };
 
@@ -792,6 +825,7 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
                     tools: [],
                     toolChoice: "none",
                     responseFormat: { type: "text" },
+                    mcpServers: options.mcpServers ?? [],
                     span,
                 };
 

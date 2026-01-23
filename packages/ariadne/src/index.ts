@@ -281,6 +281,11 @@ export * as LanguageModel from "./LanguageModel.js";
 /**
  * @since 1.0.0
  */
+export * as McpRegistry from "./McpRegistry.js";
+
+/**
+ * @since 1.0.0
+ */
 export * as McpSchema from "./McpSchema.js";
 
 /**
