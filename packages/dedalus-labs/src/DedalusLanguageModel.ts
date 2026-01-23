@@ -748,11 +748,8 @@ const prepareTools: (options: LanguageModel.ProviderOptions) => Effect.Effect<
   }
 
   // Set tool choice
-  if (
-    options.toolChoice === "auto" ||
-    options.toolChoice === "none" ||
-    options.toolChoice === "required"
-  ) {
+  // Note: Dedalus API doesn't accept "auto" as a string, so we only set it for "none" and "required"
+  if (options.toolChoice === "none" || options.toolChoice === "required") {
     toolChoice = options.toolChoice;
   }
 
