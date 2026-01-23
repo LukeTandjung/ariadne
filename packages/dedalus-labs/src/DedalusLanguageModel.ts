@@ -6,6 +6,7 @@ import {
   Model as AiModel,
   IdGenerator,
   LanguageModel,
+  McpRegistry,
   type Response,
   Tool,
 } from "@src/ariadne";
@@ -119,6 +120,10 @@ export const make = Effect.fnUntraced(function* (options: {
       tools,
       tool_choice: toolChoice,
       response_format: responseFormat,
+      mcp_servers:
+        providerOptions.mcpServers.length > 0
+          ? McpRegistry.toApiFormat(providerOptions.mcpServers)
+          : undefined,
     };
     return request;
   });
@@ -455,9 +460,26 @@ const makeResponse: (
         cachedInputTokens: response.usage?.prompt_tokens_details?.cached_tokens,
       },
       metadata: {
-        dedalus: { serviceTier: response.service_tier },
+        dedalus: {
+          serviceTier: response.service_tier,
+          toolsExecuted: response.tools_executed,
+          mcpServerErrors: response.mcp_server_errors,
+        },
       },
     });
+  }
+
+  // Handle MCP tool executions (server-side executed tools)
+  if (response.tools_executed && response.tools_executed.length > 0) {
+    for (const toolName of response.tools_executed) {
+      parts.push({
+        type: "tool-call",
+        id: yield* idGenerator.generateId(),
+        name: toolName,
+        params: {},
+        providerExecuted: true,
+      });
+    }
   }
 
   return parts;
