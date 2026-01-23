@@ -20,6 +20,7 @@
         "@commitlint/cli": "^19.8.0",
         "@commitlint/config-conventional": "^19.8.0",
         "@effect/eslint-plugin": "^0.3.2",
+        "@effect/platform-bun": "^0.87.1",
         "@tim-smart/openapi-gen": "^0.4.13",
         "@types/bun": "^1.3.6",
         "@typescript-eslint/eslint-plugin": "^8.53.1",
