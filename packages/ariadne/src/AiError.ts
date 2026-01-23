@@ -46,12 +46,12 @@
  * const aiOperation = Effect.gen(function* () {
  *   // Some AI operation that might fail
  *   return yield* new AiError.HttpRequestError({
- *     module: "OpenAI",
+ *     module: "AIService",
  *     method: "completion",
  *     reason: "Transport",
  *     request: {
  *       method: "POST",
- *       url: "https://api.openai.com/v1/completions",
+ *       url: "https://api.dedaluslabs.ai/v1/completions",
  *       urlParams: [],
  *       hash: Option.none(),
  *       headers: { "Content-Type": "application/json" }
@@ -135,7 +135,7 @@ export const isAiError = (u: unknown): u is AiError =>
  *
  * const requestDetails: typeof AiError.HttpRequestDetails.Type = {
  *   method: "POST",
- *   url: "https://api.openai.com/v1/completions",
+ *   url: "https://api.dedaluslabs.ai/v1/completions",
  *   urlParams: [["model", "gpt-4"], ["stream", "false"]],
  *   hash: Option.some("#section1"),
  *   headers: { "Content-Type": "application/json" }
@@ -175,12 +175,12 @@ export const HttpRequestDetails = Schema.Struct({
  *
  * const handleNetworkError = Effect.gen(function* () {
  *   const error = new AiError.HttpRequestError({
- *     module: "OpenAI",
+ *     module: "AIService",
  *     method: "createCompletion",
  *     reason: "Transport",
  *     request: {
  *       method: "POST",
- *       url: "https://api.openai.com/v1/completions",
+ *       url: "https://api.dedaluslabs.ai/v1/completions",
  *       urlParams: [],
  *       hash: Option.none(),
  *       headers: { "Content-Type": "application/json" }
@@ -189,7 +189,7 @@ export const HttpRequestDetails = Schema.Struct({
  *   })
  *
  *   console.log(error.message)
- *   // "Transport: Connection timeout after 30 seconds (POST https://api.openai.com/v1/completions)"
+ *   // "Transport: Connection timeout after 30 seconds (POST https://api.dedaluslabs.ai/v1/completions)"
  * })
  * ```
  *
@@ -223,7 +223,7 @@ export class HttpRequestError extends Schema.TaggedError<HttpRequestError>(
      * declare const platformError: HttpClientError.RequestError
      *
      * const aiError = AiError.HttpRequestError.fromRequestError({
-     *   module: "ChatGPT",
+     *   module: "AIService",
      *   method: "sendMessage",
      *   error: platformError
      * })
@@ -338,12 +338,12 @@ export const HttpResponseDetails = Schema.Struct({
  * import { Option } from "effect"
  *
  * const responseError = new AiError.HttpResponseError({
- *   module: "OpenAI",
+ *   module: "AIService",
  *   method: "createCompletion",
  *   reason: "StatusCode",
  *   request: {
  *     method: "POST",
- *     url: "https://api.openai.com/v1/completions",
+ *     url: "https://api.dedaluslabs.ai/v1/completions",
  *     urlParams: [],
  *     hash: Option.none(),
  *     headers: { "Content-Type": "application/json" }
@@ -356,7 +356,7 @@ export const HttpResponseDetails = Schema.Struct({
  * })
  *
  * console.log(responseError.message)
- * // "StatusCode: Rate limit exceeded (429 POST https://api.openai.com/v1/completions)"
+ * // "StatusCode: Rate limit exceeded (429 POST https://api.dedaluslabs.ai/v1/completions)"
  * ```
  *
  * @since 1.0.0
@@ -390,7 +390,7 @@ export class HttpResponseError extends Schema.TaggedError<HttpResponseError>(
      * declare const platformError: HttpClientError.ResponseError
      *
      * const aiError = AiError.HttpResponseError.fromResponseError({
-     *   module: "OpenAI",
+     *   module: "AIService",
      *   method: "completion",
      *   error: platformError
      * })
@@ -504,7 +504,7 @@ export class HttpResponseError extends Schema.TaggedError<HttpResponseError>(
  *   typeof data === "string" && data.length > 0
  *     ? Effect.succeed(data)
  *     : Effect.fail(new AiError.MalformedInput({
- *         module: "ChatBot",
+ *         module: "AIService",
  *         method: "processMessage",
  *         description: "Input must be a non-empty string"
  *       }))
@@ -558,7 +558,7 @@ export class MalformedInput extends Schema.TaggedError<MalformedInput>(
  *   Schema.decodeUnknown(ResponseSchema)(data).pipe(
  *     Effect.mapError(parseError =>
  *       new AiError.MalformedOutput({
- *         module: "OpenAI",
+ *         module: "AIService",
  *         method: "completion",
  *         description: "Response doesn't match expected schema",
  *         cause: parseError
