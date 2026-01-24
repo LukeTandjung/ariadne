@@ -33,6 +33,5 @@ yarn-error.log*
 # Misc
 tmp/
 scratchpad/
-docs/
 *.pem
 .turbo
