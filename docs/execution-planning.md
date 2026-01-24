@@ -4,6 +4,8 @@ The `ExecutionPlan` module from Effect provides a robust method for creating **s
 
 ## Why Execution Planning?
 
+> **Note:** Ariadne uses Effect's `ExecutionPlan` out of the box instead of Dedalus's "Policies" feature for retry and fallback behavior.
+
 Imagine your AI program can fail with domain-specific errors:
 
 ```typescript
