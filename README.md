@@ -16,14 +16,19 @@ It aims to provide
 
 ## Documentation
 
-**[Read the full documentation](./docs/guide.md)** for comprehensive guides on:
-- Quick Start & Installation
-- Language Model API (generateText, streamText, generateObject, streamObject)
-- Tools & Toolkits
-- Chat (Stateful Conversations)
-- MCP Server Integration
-- Embeddings
-- Configuration & Error Handling
+**[Read the full documentation](./docs/README.md)** for comprehensive guides:
+
+| Guide | Description |
+|-------|-------------|
+| [Getting Started](./docs/getting-started.md) | Installation and quick start |
+| [Language Model](./docs/language-model.md) | Text generation, structured outputs, streaming |
+| [Tools & Toolkits](./docs/tools.md) | Define and implement tool calling |
+| [Chat](./docs/chat.md) | Stateful multi-turn conversations |
+| [MCP Servers](./docs/mcp.md) | Model Context Protocol integration |
+| [Execution Planning](./docs/execution-planning.md) | Retries, fallbacks, and resilience |
+| [Embeddings](./docs/embeddings.md) | Vector embeddings |
+| [Configuration](./docs/configuration.md) | Client and model options |
+| [Error Handling](./docs/error-handling.md) | Error types and patterns |
 
 ## Installation
 
