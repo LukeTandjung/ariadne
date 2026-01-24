@@ -221,5 +221,6 @@ yield* stream.pipe(
 ## Next Steps
 
 - [Tools & Toolkits](./tools.md) - Add tool calling capabilities
+- [Agent Runner](./agent-runner.md) - Enable multi-turn agentic loops
 - [Chat](./chat.md) - Maintain conversation history
 - [Execution Planning](./execution-planning.md) - Add retries and fallbacks

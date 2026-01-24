@@ -188,6 +188,7 @@ const SafeTool = Tool.make("SafeTool", {
 
 ## Next Steps
 
+- [Agent Runner](./agent-runner.md) - Enable multi-turn agentic loops with tools
 - [Chat](./chat.md) - Use tools in multi-turn conversations
 - [MCP Servers](./mcp.md) - Use hosted MCP tools
 - [Execution Planning](./execution-planning.md) - Handle tool failures with retries

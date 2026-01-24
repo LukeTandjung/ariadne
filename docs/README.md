@@ -9,6 +9,7 @@ Ariadne is a composable, type-safe agent SDK built on [Effect](https://effect.we
 | [Getting Started](./getting-started.md) | Installation, setup, and your first program |
 | [Language Model](./language-model.md) | Text generation, structured outputs, streaming |
 | [Tools & Toolkits](./tools.md) | Define and implement tool calling |
+| [Agent Runner](./agent-runner.md) | Multi-turn agentic loops with tools |
 | [Chat](./chat.md) | Stateful multi-turn conversations |
 | [MCP Servers](./mcp.md) | Model Context Protocol integration |
 | [Execution Planning](./execution-planning.md) | Retries, fallbacks, and resilience |
@@ -24,7 +25,7 @@ Ariadne is a composable, type-safe agent SDK built on [Effect](https://effect.we
 │                    Your Application                      │
 ├─────────────────────────────────────────────────────────┤
 │                  @src/ariadne (Core)                    │
-│  LanguageModel │ Chat │ Tool │ Toolkit │ Prompt │ ...   │
+│  LanguageModel │ AgentRunner │ Chat │ Tool │ Toolkit   │
 ├─────────────────────────────────────────────────────────┤
 │               @src/dedalus-labs (Provider)              │
 │    DedalusLanguageModel │ DedalusClient │ Config        │
