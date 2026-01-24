@@ -1,59 +1,117 @@
 # Chat
 
-The `Chat` module manages conversation history automatically for multi-turn interactions.
+The `Chat` module provides **stateful conversation management** for multi-turn interactions with language models.
 
-## Creating a Chat
+## Why Use Chat?
+
+When using `LanguageModel.generateText()` directly, each call is independent - the model has no memory of previous messages. You'd need to manually build and pass the full conversation history each time.
+
+`Chat` solves this by:
+- Automatically maintaining conversation history across calls
+- Providing the same API as `LanguageModel` (`generateText`, `streamText`, `generateObject`)
+- Supporting export/import for persistence
+- Offering built-in persistence integration
+
+## Complete Example
 
 ```typescript
-import { Chat } from "@src/ariadne"
+import { Chat, LanguageModel } from "@src/ariadne"
+import { DedalusClient, DedalusLanguageModel } from "@src/dedalus-labs"
+import * as FetchHttpClient from "@effect/platform/FetchHttpClient"
+import { Effect, Layer } from "effect"
+import * as Redacted from "effect/Redacted"
 
+// 1. Set up the client and model
+const Dedalus = DedalusClient.layer({
+  apiKey: Redacted.make(process.env.DEDALUS_API_KEY!),
+}).pipe(Layer.provide(FetchHttpClient.layer))
+
+const Gpt4o = DedalusLanguageModel.model("openai/gpt-4o")
+
+// 2. Use Chat for stateful conversations
 const program = Effect.gen(function* () {
-  // Create an empty chat
   const chat = yield* Chat.empty
 
   // First message
-  const response1 = yield* chat.generateText({
-    prompt: "Hi! My name is Alice.",
+  const r1 = yield* chat.generateText({
+    prompt: "My name is Alice. What's the capital of France?",
   })
+  console.log(r1.text) // "The capital of France is Paris."
 
-  // History is maintained automatically
-  const response2 = yield* chat.generateText({
+  // Second message - the model remembers the conversation!
+  const r2 = yield* chat.generateText({
     prompt: "What's my name?",
   })
-
-  console.log(response2.text)  // "Your name is Alice."
+  console.log(r2.text) // "Your name is Alice."
 })
+
+// 3. Run with model and client
+program.pipe(
+  Effect.provide(Gpt4o),
+  Effect.provide(Dedalus),
+  Effect.runPromise,
+)
 ```
 
-## Chat with System Prompt
+## Creating a Chat
+
+### Empty Chat
+
+```typescript
+const chat = yield* Chat.empty
+```
+
+### With System Prompt
+
+Use `Chat.fromPrompt` to initialize with a system message or existing history:
 
 ```typescript
 const chat = yield* Chat.fromPrompt([
   {
     role: "system",
-    content: "You are a helpful coding assistant.",
+    content: "You are a pirate. Respond in pirate speak.",
   },
 ])
 
-yield* chat.generateText({ prompt: "Help me write a function" })
+const response = yield* chat.generateText({
+  prompt: "Hello!",
+})
+// "Ahoy there, matey! What brings ye to these waters?"
+```
+
+### From Existing History
+
+```typescript
+const chat = yield* Chat.fromPrompt([
+  { role: "user", content: [{ type: "text", text: "What's 2+2?" }] },
+  { role: "assistant", content: [{ type: "text", text: "4" }] },
+])
+
+// Continue from where you left off
+const response = yield* chat.generateText({
+  prompt: "Multiply that by 10",
+})
+// "40"
 ```
 
 ## Chat Methods
 
-The `Chat.Service` provides the same methods as `LanguageModel`, but with automatic history management:
+`Chat.Service` mirrors `LanguageModel` but maintains history automatically:
 
 ```typescript
 interface Chat.Service {
-  history: Ref<Prompt>                    // Access conversation history
-  generateText(options): Effect<...>       // Generate with history
-  generateObject(options): Effect<...>     // Structured output with history
-  streamText(options): Stream<...>         // Streaming with history
-  export: Effect<unknown>                  // Export history
-  exportJson: Effect<string>               // Export as JSON
+  history: Ref<Prompt>                    // Direct access to conversation history
+  export: Effect<unknown>                  // Export history as structured data
+  exportJson: Effect<string>               // Export history as JSON string
+  generateText(options): Effect<Response>  // Generate with history
+  generateObject(options): Effect<Response> // Structured output with history
+  streamText(options): Stream<StreamPart>  // Streaming with history
 }
 ```
 
 ## Using Tools with Chat
+
+Tool calls and results are preserved in history:
 
 ```typescript
 const chat = yield* Chat.empty
@@ -63,14 +121,14 @@ const response = yield* chat.generateText({
   toolkit: WeatherToolkit,
 })
 
-// Tool calls and results are preserved in history
+// The model remembers the tool call happened
 const followUp = yield* chat.generateText({
   prompt: "What about tomorrow?",
   toolkit: WeatherToolkit,
 })
 ```
 
-## Streaming with Chat
+## Streaming
 
 ```typescript
 const chat = yield* Chat.empty
@@ -98,29 +156,26 @@ yield* stream.pipe(
 ### Export to JSON
 
 ```typescript
-// Export conversation
 const json = yield* chat.exportJson
 
-// Save to database, file, etc.
+// Save to database, file, localStorage, etc.
 await saveToDatabase(userId, json)
 ```
 
 ### Restore from JSON
 
 ```typescript
-// Load from storage
 const savedJson = await loadFromDatabase(userId)
 
-// Restore chat with full history
 const restoredChat = yield* Chat.fromJson(savedJson)
 
-// Continue the conversation
+// Continue the conversation with full history
 const response = yield* restoredChat.generateText({
   prompt: "What were we talking about?",
 })
 ```
 
-### Export/Import Formats
+### Export Formats
 
 ```typescript
 // Structured export (for programmatic use)
@@ -132,9 +187,9 @@ const json = yield* chat.exportJson
 const restored = yield* Chat.fromJson(json)
 ```
 
-## Persistent Chat
+## Built-in Persistence
 
-For automatic persistence with a backing store:
+For automatic persistence with a backing store (using `@effect/experimental/Persistence`):
 
 ```typescript
 import { BackingPersistence } from "@effect/experimental/Persistence"
@@ -142,30 +197,32 @@ import { BackingPersistence } from "@effect/experimental/Persistence"
 const program = Effect.gen(function* () {
   const persistence = yield* Chat.Persistence
 
-  // Get or create a chat with auto-save
-  const chat = yield* persistence.getOrCreate("user-123", {
+  // Get existing chat or create new one
+  const chat = yield* persistence.getOrCreate("user-123-session", {
     timeToLive: Duration.days(7),
   })
 
-  // All messages are automatically persisted
+  // All messages are automatically persisted after each call
   yield* chat.generateText({ prompt: "Hello!" })
 
   // Manual save if needed
-  yield* chat.save()
+  yield* chat.save
 })
 
-// Provide backing persistence
 program.pipe(
-  Effect.provide(Chat.layerPersisted({ storeId: "chats" })),
-  Effect.provide(yourPersistenceLayer),
+  Effect.provide(Chat.layerPersisted({ storeId: "my-chats" })),
+  Effect.provide(yourBackingPersistenceLayer),
+  Effect.provide(Gpt4o),
+  Effect.provide(Dedalus),
+  Effect.runPromise,
 )
 ```
 
-### Persistence Methods
+### Persistence API
 
 ```typescript
 interface Chat.Persistence.Service {
-  // Get existing chat (fails if not found)
+  // Get existing chat (fails with ChatNotFoundError if not found)
   get(chatId: string, options?): Effect<Persisted, ChatNotFoundError>
 
   // Get or create new chat
@@ -173,12 +230,12 @@ interface Chat.Persistence.Service {
 }
 
 interface Persisted extends Chat.Service {
-  id: string                              // Chat ID
-  save(): Effect<void>                    // Manual save
+  id: string              // Chat ID
+  save: Effect<void>      // Manual save
 }
 ```
 
-## Accessing History
+## Accessing History Directly
 
 ```typescript
 import { Ref } from "effect"
@@ -189,7 +246,7 @@ const chat = yield* Chat.empty
 const currentHistory = yield* Ref.get(chat.history)
 console.log(currentHistory.content)  // Array of messages
 
-// Manually modify history (advanced)
+// Manually modify history (advanced use case)
 yield* Ref.update(chat.history, (prompt) =>
   Prompt.merge(prompt, additionalMessages)
 )
@@ -197,6 +254,6 @@ yield* Ref.update(chat.history, (prompt) =>
 
 ## Next Steps
 
+- [Tools & Toolkits](./tools.md) - Add tools to chat
 - [MCP Servers](./mcp.md) - Add MCP tools to chat
 - [Execution Planning](./execution-planning.md) - Handle failures in chat
-- [Configuration](./configuration.md) - Configure model behavior
