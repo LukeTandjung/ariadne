@@ -160,6 +160,30 @@ export interface Service {
         ExtractError<Options>,
         ExtractContext<Options>
     >;
+
+    /**
+     * Generate a structured object from a schema with streaming output.
+     *
+     * Returns a stream of parts that emit partial JSON deltas as they arrive,
+     * along with progressively parsed partial objects, and finally the validated
+     * complete object.
+     */
+    readonly streamObject: <
+        A,
+        I extends Record<string, unknown>,
+        R,
+        Options extends NoExcessProperties<
+            GenerateObjectOptions<any, A, I, R>,
+            Options
+        >,
+        Tools extends Record<string, Tool.Any> = {},
+    >(
+        options: Options & GenerateObjectOptions<Tools, A, I, R>,
+    ) => Stream.Stream<
+        Response.StreamObjectPart<A>,
+        ExtractError<Options>,
+        R | ExtractContext<Options>
+    >;
 }
 
 /**
@@ -1091,10 +1115,175 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
             return Mailbox.toStream(mailbox);
         });
 
+        const streamObject = <
+            A,
+            I extends Record<string, unknown>,
+            R,
+            Options extends NoExcessProperties<
+                GenerateObjectOptions<any, A, I, R>,
+                Options
+            >,
+            Tools extends Record<string, Tool.Any> = {},
+        >(
+            options: Options & GenerateObjectOptions<Tools, A, I, R>,
+        ): Stream.Stream<
+            Response.StreamObjectPart<A>,
+            ExtractError<Options>,
+            R | ExtractContext<Options>
+        > => {
+            const schema: Schema.Schema<A, I, R> = options.schema;
+            const objectName = getObjectName(options.objectName, schema);
+
+            // Helper to try parsing partial JSON
+            const tryParsePartial = (json: string): unknown | undefined => {
+                try {
+                    return JSON.parse(json);
+                } catch {
+                    try {
+                        const trimmed = json.trim();
+                        let closed = trimmed;
+                        const openBraces =
+                            (trimmed.match(/\{/g) || []).length -
+                            (trimmed.match(/\}/g) || []).length;
+                        const openBrackets =
+                            (trimmed.match(/\[/g) || []).length -
+                            (trimmed.match(/\]/g) || []).length;
+                        for (let i = 0; i < openBrackets; i++) closed += "]";
+                        for (let i = 0; i < openBraces; i++) closed += "}";
+                        return JSON.parse(closed);
+                    } catch {
+                        return undefined;
+                    }
+                }
+            };
+
+            return Effect.fnUntraced(
+                function* () {
+                    const span = yield* Effect.makeSpanScoped(
+                        "LanguageModel.streamObject",
+                        {
+                            captureStackTrace: false,
+                            attributes: { objectName },
+                        },
+                    );
+
+                    const providerOptions: Mutable<ProviderOptions> = {
+                        prompt: Prompt.make(options.prompt),
+                        tools: [],
+                        toolChoice: "none",
+                        responseFormat: { type: "json", objectName, schema },
+                        mcpServers: options.mcpServers ?? [],
+                        span,
+                    };
+
+                    // Decode schema for the raw stream
+                    const decodeSchema = Schema.ChunkFromSelf(
+                        Response.StreamPart(Toolkit.empty),
+                    );
+                    const decode = Schema.decode(decodeSchema);
+
+                    // Get decoded stream from the provider
+                    const decodedStream = params
+                        .streamText(providerOptions)
+                        .pipe(Stream.mapChunksEffect(decode));
+
+                    // Generate a unique ID for this object stream
+                    const objectId = yield* idGenerator.generateId();
+
+                    // Accumulator for JSON content
+                    let accumulated = "";
+
+                    // Transform decoded parts into object parts
+                    return decodedStream.pipe(
+                        Stream.mapEffect(
+                            Effect.fnUntraced(function* (
+                                part: Response.StreamPart<{}>,
+                            ) {
+                                if (part.type === "text-delta") {
+                                    accumulated += part.delta;
+                                    const partial = tryParsePartial(accumulated);
+                                    return Response.objectDeltaPart({
+                                        id: objectId,
+                                        delta: part.delta,
+                                        accumulated,
+                                        partial,
+                                    });
+                                }
+
+                                if (part.type === "finish") {
+                                    const decodeJson = Schema.decode(
+                                        Schema.parseJson(schema),
+                                    );
+                                    const value = yield* Effect.mapError(
+                                        decodeJson(accumulated),
+                                        (cause) =>
+                                            new AiError.MalformedOutput({
+                                                module: "LanguageModel",
+                                                method: "streamObject",
+                                                description:
+                                                    "Generated object failed to conform to provided schema",
+                                                cause,
+                                            }),
+                                    );
+                                    return Response.objectDonePart<A>({
+                                        id: objectId,
+                                        value,
+                                        raw: accumulated,
+                                    });
+                                }
+
+                                if (part.type === "response-metadata") {
+                                    return Response.responseMetadataPart({
+                                        id: part.id,
+                                        modelId: part.modelId,
+                                        timestamp: part.timestamp,
+                                    });
+                                }
+
+                                if (part.type === "error") {
+                                    return Response.errorPart({
+                                        error: part.error,
+                                    });
+                                }
+
+                                // Skip other part types
+                                return undefined;
+                            }),
+                        ),
+                        Stream.filter(
+                            (
+                                part,
+                            ): part is
+                                | Response.ObjectDeltaPart
+                                | Response.ObjectDonePart<A>
+                                | Response.ResponseMetadataPart
+                                | Response.ErrorPart => part !== undefined,
+                        ),
+                    );
+                },
+                Stream.unwrapScoped,
+                Stream.mapError((error) =>
+                    ParseResult.isParseError(error)
+                        ? AiError.MalformedOutput.fromParseError({
+                              module: "LanguageModel",
+                              method: "streamObject",
+                              error,
+                          })
+                        : error,
+                ),
+                Stream.provideService(IdGenerator, idGenerator),
+            )() as Stream.Stream<
+                Response.StreamObjectPart<A>,
+                ExtractError<Options>,
+                R | ExtractContext<Options>
+            >;
+        };
+
         return {
             generateText,
             generateObject,
             streamText,
+            streamObject,
         } as const;
     });
 
@@ -1224,6 +1413,59 @@ export const streamText = <
 > =>
     Stream.unwrap(
         LanguageModel.pipe(Effect.map((model) => model.streamText(options))),
+    );
+
+/**
+ * Generate a structured object from a schema using a language model with streaming output.
+ *
+ * Returns a stream of response parts that emit partial JSON deltas as they arrive,
+ * along with progressively parsed partial objects, and finally the validated complete object.
+ *
+ * @example
+ * ```ts
+ * import { LanguageModel } from "@effect/ai"
+ * import { Effect, Schema, Stream, Console } from "effect"
+ *
+ * const PersonSchema = Schema.Struct({
+ *   name: Schema.String,
+ *   age: Schema.Number,
+ * })
+ *
+ * const program = LanguageModel.streamObject({
+ *   prompt: "Create a person named John who is 30 years old",
+ *   schema: PersonSchema
+ * }).pipe(Stream.runForEach((part) => {
+ *   if (part.type === "object-delta") {
+ *     return Console.log("Partial:", part.partial)
+ *   }
+ *   if (part.type === "object-done") {
+ *     return Console.log("Final:", part.value)
+ *   }
+ *   return Effect.void
+ * }))
+ * ```
+ *
+ * @since 1.0.0
+ * @category Functions
+ */
+export const streamObject = <
+    A,
+    I extends Record<string, unknown>,
+    R,
+    Options extends NoExcessProperties<
+        GenerateObjectOptions<any, A, I, R>,
+        Options
+    >,
+    Tools extends Record<string, Tool.Any> = {},
+>(
+    options: Options & GenerateObjectOptions<Tools, A, I, R>,
+): Stream.Stream<
+    Response.StreamObjectPart<A>,
+    ExtractError<Options>,
+    LanguageModel | R | ExtractContext<Options>
+> =>
+    Stream.unwrap(
+        LanguageModel.pipe(Effect.map((model) => model.streamObject(options))),
     );
 
 // =============================================================================

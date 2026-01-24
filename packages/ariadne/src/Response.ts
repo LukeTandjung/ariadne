@@ -92,7 +92,9 @@ export type AnyPart =
     | UrlSourcePart
     | ResponseMetadataPart
     | FinishPart
-    | ErrorPart;
+    | ErrorPart
+    | ObjectDeltaPart
+    | ObjectDonePart;
 
 /**
  * Encoded representation of all possible response content parts for serialization.
@@ -119,7 +121,9 @@ export type AnyPartEncoded =
     | UrlSourcePartEncoded
     | ResponseMetadataPartEncoded
     | FinishPartEncoded
-    | ErrorPartEncoded;
+    | ErrorPartEncoded
+    | ObjectDeltaPartEncoded
+    | ObjectDonePartEncoded;
 
 /**
  * Union type for all response parts with tool-specific typing.
@@ -146,7 +150,9 @@ export type AllParts<Tools extends Record<string, Tool.Any>> =
     | UrlSourcePart
     | ResponseMetadataPart
     | FinishPart
-    | ErrorPart;
+    | ErrorPart
+    | ObjectDeltaPart
+    | ObjectDonePart;
 
 /**
  * Encoded representation of all response parts for serialization.
@@ -173,7 +179,9 @@ export type AllPartsEncoded =
     | UrlSourcePartEncoded
     | ResponseMetadataPartEncoded
     | FinishPartEncoded
-    | ErrorPartEncoded;
+    | ErrorPartEncoded
+    | ObjectDeltaPartEncoded
+    | ObjectDonePartEncoded;
 
 /**
  * Creates a Schema for all response parts based on a toolkit.
@@ -380,6 +388,36 @@ export type StreamPartEncoded =
     | FilePartEncoded
     | DocumentSourcePartEncoded
     | UrlSourcePartEncoded
+    | ResponseMetadataPartEncoded
+    | FinishPartEncoded
+    | ErrorPartEncoded;
+
+/**
+ * A type for representing streaming object response parts.
+ *
+ * Used by `streamObject` to emit partial JSON deltas and the final validated object.
+ *
+ * @template A - The type of the final validated object
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export type StreamObjectPart<A = unknown> =
+    | ObjectDeltaPart
+    | ObjectDonePart<A>
+    | ResponseMetadataPart
+    | FinishPart
+    | ErrorPart;
+
+/**
+ * Encoded representation of streaming object response parts for serialization.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export type StreamObjectPartEncoded =
+    | ObjectDeltaPartEncoded
+    | ObjectDonePartEncoded
     | ResponseMetadataPartEncoded
     | FinishPartEncoded
     | ErrorPartEncoded;
@@ -2566,3 +2604,175 @@ export const ErrorPart: Schema.Schema<ErrorPart, ErrorPartEncoded> =
  */
 export const errorPart = (params: ConstructorParams<ErrorPart>): ErrorPart =>
     makePart("error", params);
+
+// =============================================================================
+// Object Delta Part (for streaming structured outputs)
+// =============================================================================
+
+/**
+ * Response part representing incremental JSON content during object streaming.
+ *
+ * Contains the delta (new JSON characters), accumulated JSON so far, and
+ * a best-effort partial parse of the incomplete JSON.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export interface ObjectDeltaPart
+    extends BasePart<"object-delta", ObjectDeltaPartMetadata> {
+    /**
+     * Unique identifier for this object stream.
+     */
+    readonly id: string;
+    /**
+     * The incremental JSON content to add.
+     */
+    readonly delta: string;
+    /**
+     * The accumulated JSON string so far.
+     */
+    readonly accumulated: string;
+    /**
+     * Best-effort partial parse of the accumulated JSON.
+     * May be undefined if parsing fails.
+     */
+    readonly partial: unknown;
+}
+
+/**
+ * Encoded representation of object delta parts for serialization.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export interface ObjectDeltaPartEncoded
+    extends BasePartEncoded<"object-delta", ObjectDeltaPartMetadata> {
+    readonly id: string;
+    readonly delta: string;
+    readonly accumulated: string;
+    readonly partial: unknown;
+}
+
+/**
+ * Represents provider-specific metadata that can be associated with an
+ * `ObjectDeltaPart` through module augmentation.
+ *
+ * @since 1.0.0
+ * @category ProviderOptions
+ */
+export interface ObjectDeltaPartMetadata extends ProviderMetadata {}
+
+/**
+ * Schema for validation and encoding of object delta parts.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ObjectDeltaPart: Schema.Schema<
+    ObjectDeltaPart,
+    ObjectDeltaPartEncoded
+> = Schema.Struct({
+    type: Schema.Literal("object-delta"),
+    id: Schema.String,
+    delta: Schema.String,
+    accumulated: Schema.String,
+    partial: Schema.Unknown,
+    metadata: Schema.optionalWith(ProviderMetadata, {
+        default: constEmptyObject,
+    }),
+}).pipe(
+    Schema.attachPropertySignature(PartTypeId, PartTypeId),
+    Schema.annotations({ identifier: "ObjectDeltaPart" }),
+);
+
+/**
+ * Constructs a new object delta part.
+ *
+ * @since 1.0.0
+ * @category Constructors
+ */
+export const objectDeltaPart = (
+    params: ConstructorParams<ObjectDeltaPart>,
+): ObjectDeltaPart => makePart("object-delta", params);
+
+// =============================================================================
+// Object Done Part (for streaming structured outputs)
+// =============================================================================
+
+/**
+ * Response part indicating the completion of structured object streaming.
+ *
+ * Contains the final validated object value and the raw JSON string.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export interface ObjectDonePart<A = unknown>
+    extends BasePart<"object-done", ObjectDonePartMetadata> {
+    /**
+     * Unique identifier matching the object stream.
+     */
+    readonly id: string;
+    /**
+     * The final validated object value.
+     */
+    readonly value: A;
+    /**
+     * The complete raw JSON string.
+     */
+    readonly raw: string;
+}
+
+/**
+ * Encoded representation of object done parts for serialization.
+ *
+ * @since 1.0.0
+ * @category Models
+ */
+export interface ObjectDonePartEncoded
+    extends BasePartEncoded<"object-done", ObjectDonePartMetadata> {
+    readonly id: string;
+    readonly value: unknown;
+    readonly raw: string;
+}
+
+/**
+ * Represents provider-specific metadata that can be associated with an
+ * `ObjectDonePart` through module augmentation.
+ *
+ * @since 1.0.0
+ * @category ProviderOptions
+ */
+export interface ObjectDonePartMetadata extends ProviderMetadata {}
+
+/**
+ * Schema for validation and encoding of object done parts.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const ObjectDonePart: Schema.Schema<
+    ObjectDonePart,
+    ObjectDonePartEncoded
+> = Schema.Struct({
+    type: Schema.Literal("object-done"),
+    id: Schema.String,
+    value: Schema.Unknown,
+    raw: Schema.String,
+    metadata: Schema.optionalWith(ProviderMetadata, {
+        default: constEmptyObject,
+    }),
+}).pipe(
+    Schema.attachPropertySignature(PartTypeId, PartTypeId),
+    Schema.annotations({ identifier: "ObjectDonePart" }),
+);
+
+/**
+ * Constructs a new object done part.
+ *
+ * @since 1.0.0
+ * @category Constructors
+ */
+export const objectDonePart = <A>(
+    params: ConstructorParams<ObjectDonePart<A>>,
+): ObjectDonePart<A> => makePart("object-done", params) as ObjectDonePart<A>;
