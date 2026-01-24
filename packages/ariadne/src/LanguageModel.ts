@@ -793,6 +793,19 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
                             providerOptions,
                         );
 
+                        // Check if the model is still processing tool calls
+                        // If so, return with undefined value to allow continuation
+                        const finishPart = content.find(
+                            (part) => part.type === "finish",
+                        );
+                        const finishReason = finishPart?.reason ?? "unknown";
+                        if (finishReason === "tool-calls") {
+                            return new GenerateObjectResponse(
+                                undefined as A,
+                                content,
+                            );
+                        }
+
                         const value = yield* resolveStructuredOutput(
                             content as any,
                             schema,

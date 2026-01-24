@@ -1,8 +1,7 @@
 import { expect, test } from "bun:test";
-import { greet } from "../src";
+import { LanguageModel } from "../src";
 
-test("ariadne package should greet correctly", () => {
-    expect(greet("World")).toBe(
-        "Hello, World! Welcome to the ariadne package.",
-    );
+test("ariadne package exports LanguageModel", () => {
+    expect(LanguageModel).toBeDefined();
+    expect(LanguageModel.generateText).toBeDefined();
 });

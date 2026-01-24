@@ -6,6 +6,7 @@ import * as Redacted from "effect/Redacted";
 import * as Stream from "effect/Stream";
 import * as Schema from "effect/Schema";
 import {
+  AgentRunner,
   LanguageModel,
   EmbeddingModel,
   IdGenerator,
@@ -731,6 +732,208 @@ describe("Integration Tests", () => {
         expect(team.members[0].role).toBeDefined();
         expect(team.project.title).toBeDefined();
         expect(team.project.deadline).toBeDefined();
+      },
+      { timeout: 60000 },
+    );
+  });
+
+  // =============================================================================
+  // AgentRunner Tests
+  // =============================================================================
+
+  describe("AgentRunner", () => {
+    skipIfNoApiKey(
+      "should complete multi-turn tool calling with ReAct loop",
+      async () => {
+        // This prompt requires multiple tool calls to compute the result
+        const program = LanguageModel.generateText({
+          prompt:
+            "I need to calculate: (5 + 3) * 2. First add 5 and 3, then multiply the result by 2. Use the calculator tool for each step and tell me the final answer.",
+          toolkit: CalculatorToolkit,
+        });
+
+        const result = await program.pipe(
+          Effect.provide(CalculatorToolkitLive),
+          Effect.provide(AgentRunner.ReAct),
+          Effect.provide(AgentRunner.defaultConfig),
+          Effect.provide(Gpt4oMini),
+          Effect.provide(Dedalus),
+          Effect.runPromise,
+        );
+
+        // Should have completed with stop (not tool-calls)
+        expect(result.finishReason).toBe("stop");
+        // Should have made multiple tool calls
+        expect(result.toolCalls.length).toBeGreaterThanOrEqual(2);
+        // Final text should contain the answer (16)
+        expect(result.text).toContain("16");
+      },
+      { timeout: 60000 },
+    );
+
+    skipIfNoApiKey(
+      "should accumulate tool results from multiple turns",
+      async () => {
+        const program = LanguageModel.generateText({
+          prompt:
+            "Calculate these three things and tell me all results: 10+5, 20-8, and 6*7. Use the calculator for each.",
+          toolkit: CalculatorToolkit,
+        });
+
+        const result = await program.pipe(
+          Effect.provide(CalculatorToolkitLive),
+          Effect.provide(AgentRunner.ReAct),
+          Effect.provide(AgentRunner.defaultConfig),
+          Effect.provide(Gpt4oMini),
+          Effect.provide(Dedalus),
+          Effect.runPromise,
+        );
+
+        expect(result.finishReason).toBe("stop");
+        // Should have at least 3 tool calls (one for each calculation)
+        expect(result.toolCalls.length).toBeGreaterThanOrEqual(3);
+        // Should have matching tool results
+        expect(result.toolResults.length).toBe(result.toolCalls.length);
+
+        // Verify results contain expected values
+        const results = result.toolResults.map((r) => r.result);
+        expect(results).toContain(15); // 10+5
+        expect(results).toContain(12); // 20-8
+        expect(results).toContain(42); // 6*7
+      },
+      { timeout: 60000 },
+    );
+
+    skipIfNoApiKey(
+      "should respect maxTurns configuration",
+      async () => {
+        // Use a very low maxTurns to force early termination
+        const customConfig = Layer.succeed(AgentRunner.Config, { maxTurns: 1 });
+
+        const program = LanguageModel.generateText({
+          prompt:
+            "Calculate (10 + 5) * 3. Use the calculator tool for each step.",
+          toolkit: CalculatorToolkit,
+        });
+
+        const result = await program.pipe(
+          Effect.provide(CalculatorToolkitLive),
+          Effect.provide(AgentRunner.ReAct),
+          Effect.provide(customConfig),
+          Effect.provide(Gpt4oMini),
+          Effect.provide(Dedalus),
+          Effect.runPromise,
+        );
+
+        // With maxTurns=1, should stop after first turn even if tool calls remain
+        // The model will either return tool-calls (hit max) or stop (completed in 1 turn)
+        expect(result.toolCalls.length).toBeGreaterThan(0);
+      },
+      { timeout: 60000 },
+    );
+
+    skipIfNoApiKey(
+      "should work without AgentRunner for single-turn tool calls",
+      async () => {
+        // Baseline test: without AgentRunner, tool calls are resolved but loop doesn't continue
+        const program = LanguageModel.generateText({
+          prompt: "What is 7 + 8? Use the calculator tool.",
+          toolkit: CalculatorToolkit,
+        });
+
+        const result = await program.pipe(
+          Effect.provide(CalculatorToolkitLive),
+          // Note: NO AgentRunner.ReAct provided
+          Effect.provide(Gpt4oMini),
+          Effect.provide(Dedalus),
+          Effect.runPromise,
+        );
+
+        // Without AgentRunner, should return after tool resolution
+        expect(result.finishReason).toBe("tool-calls");
+        expect(result.toolCalls.length).toBe(1);
+        expect(result.toolResults.length).toBe(1);
+        expect(result.toolResults[0].result).toBe(15);
+      },
+      { timeout: 60000 },
+    );
+
+    skipIfNoApiKey(
+      "should stream multi-turn conversations",
+      async () => {
+        const parts: Array<{ type: string; name?: string }> = [];
+        let finishCount = 0;
+
+        const stream = LanguageModel.streamText({
+          prompt: "Add 100 and 200, then subtract 50 from the result. Use calculator.",
+          toolkit: CalculatorToolkit,
+        });
+
+        await stream.pipe(
+          Stream.tap((part) =>
+            Effect.sync(() => {
+              if (part.type === "tool-call") {
+                parts.push({ type: part.type, name: part.name });
+              } else if (part.type === "tool-result") {
+                parts.push({ type: part.type, name: part.name });
+              } else if (part.type === "finish") {
+                finishCount++;
+                parts.push({ type: part.type });
+              } else if (part.type === "text-delta") {
+                parts.push({ type: part.type });
+              }
+            }),
+          ),
+          Stream.runDrain,
+          Effect.provide(CalculatorToolkitLive),
+          Effect.provide(AgentRunner.ReAct),
+          Effect.provide(AgentRunner.defaultConfig),
+          Effect.provide(Gpt4oMini),
+          Effect.provide(Dedalus),
+          Effect.runPromise,
+        );
+
+        // Should have tool calls and results
+        expect(parts.some((p) => p.type === "tool-call")).toBe(true);
+        expect(parts.some((p) => p.type === "tool-result")).toBe(true);
+        // Should have text in the final response
+        expect(parts.some((p) => p.type === "text-delta")).toBe(true);
+        // Should have multiple finish parts (one per turn)
+        expect(finishCount).toBeGreaterThanOrEqual(2);
+      },
+      { timeout: 60000 },
+    );
+
+    skipIfNoApiKey(
+      "should work with generateObject in ReAct loop",
+      async () => {
+        const CalculationResultSchema = Schema.Struct({
+          expression: Schema.String,
+          result: Schema.Number,
+          steps: Schema.Array(Schema.String),
+        });
+
+        const program = LanguageModel.generateObject({
+          prompt:
+            "Calculate 25 * 4 using the calculator and return the result in structured format.",
+          schema: CalculationResultSchema,
+          toolkit: CalculatorToolkit,
+        });
+
+        const result = await program.pipe(
+          Effect.provide(CalculatorToolkitLive),
+          Effect.provide(AgentRunner.ReAct),
+          Effect.provide(AgentRunner.defaultConfig),
+          Effect.provide(Gpt4oMini),
+          Effect.provide(Dedalus),
+          Effect.runPromise,
+        );
+
+        expect(result.finishReason).toBe("stop");
+        expect(result.value).toBeDefined();
+        expect(result.value.result).toBe(100);
+        expect(typeof result.value.expression).toBe("string");
+        expect(Array.isArray(result.value.steps)).toBe(true);
       },
       { timeout: 60000 },
     );

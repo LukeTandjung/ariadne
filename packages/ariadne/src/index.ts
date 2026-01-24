@@ -72,6 +72,50 @@
 export * as AiError from "./AiError.js";
 
 /**
+ * The `AgentRunner` module provides agentic loop capabilities for AI language
+ * models.
+ *
+ * This module enables multi-turn inference loops where the language model can
+ * iteratively call tools and receive results until it produces a final answer.
+ * It wraps the `LanguageModel` service to provide this functionality while
+ * maintaining full compatibility with the existing API surface.
+ *
+ * @example
+ * ```ts
+ * import { AgentRunner, LanguageModel, Toolkit, Tool } from "ariadne"
+ * import { Effect, Schema } from "effect"
+ *
+ * // Define tools
+ * const SearchTool = Tool.make("search", {
+ *   description: "Search the web",
+ *   parameters: { query: Schema.String },
+ *   success: Schema.String,
+ * })
+ *
+ * const MyToolkit = Toolkit.make(SearchTool)
+ *
+ * // Use LanguageModel as usual
+ * const program = LanguageModel.generateText({
+ *   prompt: "Research the latest AI developments",
+ *   toolkit: MyToolkit,
+ * })
+ *
+ * // Add AgentRunner.ReAct to enable multi-turn loop
+ * program.pipe(
+ *   Effect.provide(MyToolkitLive),
+ *   Effect.provide(AgentRunner.ReAct),
+ *   Effect.provide(AgentRunner.defaultConfig),
+ *   Effect.provide(Gpt4oMini),
+ *   Effect.provide(Dedalus),
+ *   Effect.runPromise
+ * )
+ * ```
+ *
+ * @since 1.0.0
+ */
+export * as AgentRunner from "./AgentRunner.js";
+
+/**
  * The `Chat` module provides a stateful conversation interface for AI language
  * models.
  *
