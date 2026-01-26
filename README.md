@@ -33,7 +33,7 @@ It aims to provide
 ## Installation
 
 ```bash
-bun install ariadne
+bun install @luketandjung/ariadne @luketandjung/dedalus-labs
 ```
 
 ## Quick Start
