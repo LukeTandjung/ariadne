@@ -10,4 +10,13 @@ export default defineWorkspace([
             dts: true,
         },
     },
+    {
+        name: "dedalus-labs",
+        root: "packages/dedalus-labs",
+        config: {
+            entry: ["src/index.ts"],
+            format: ["esm", "cjs"],
+            dts: true,
+        },
+    },
 ]);

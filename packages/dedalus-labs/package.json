@@ -1,7 +1,23 @@
 {
     "name": "@luketandjung/dedalus-labs",
-    "module": "index.ts",
+    "version": "1.0.0",
     "type": "module",
+    "description": "Dedalus Labs AI provider for the Ariadne agent SDK",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts",
+        "./*": "./src/*.ts",
+        "./internal/*": null
+    },
+    "files": ["dist"],
+    "scripts": {
+        "build": "bunup",
+        "dev": "bunup --watch",
+        "test": "bun test"
+    },
     "dependencies": {
         "@luketandjung/ariadne": "workspace:*",
         "@effect/experimental": "^0.58.0",
@@ -13,5 +29,27 @@
     },
     "peerDependencies": {
         "typescript": "^5"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LukeTandjung/ariadne.git"
+    },
+    "homepage": "https://github.com/LukeTandjung/ariadne#readme",
+    "publishConfig": {
+        "access": "public",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "import": {
+                    "types": "./dist/index.d.ts",
+                    "default": "./dist/index.js"
+                },
+                "require": {
+                    "types": "./dist/index.d.ts",
+                    "default": "./dist/index.cjs"
+                }
+            }
+        }
     }
 }
