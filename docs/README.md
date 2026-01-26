@@ -24,10 +24,10 @@ Ariadne is a composable, type-safe agent SDK built on [Effect](https://effect.we
 ┌─────────────────────────────────────────────────────────┐
 │                    Your Application                      │
 ├─────────────────────────────────────────────────────────┤
-│                  @src/ariadne (Core)                    │
+│                  @luketandjung/ariadne (Core)                    │
 │  LanguageModel │ AgentRunner │ Chat │ Tool │ Toolkit   │
 ├─────────────────────────────────────────────────────────┤
-│               @src/dedalus-labs (Provider)              │
+│               @luketandjung/dedalus-labs (Provider)              │
 │    DedalusLanguageModel │ DedalusClient │ Config        │
 ├─────────────────────────────────────────────────────────┤
 │                  Dedalus Labs API                        │

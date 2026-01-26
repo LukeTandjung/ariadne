@@ -4,13 +4,13 @@
 
 ```bash
 # Using bun (recommended)
-bun add @src/ariadne @src/dedalus-labs
+bun add @luketandjung/ariadne @luketandjung/dedalus-labs
 
 # Using npm
-npm install @src/ariadne @src/dedalus-labs
+npm install @luketandjung/ariadne @luketandjung/dedalus-labs
 
 # Using pnpm
-pnpm add @src/ariadne @src/dedalus-labs
+pnpm add @luketandjung/ariadne @luketandjung/dedalus-labs
 ```
 
 You'll also need the Effect platform package for HTTP client support:
@@ -24,8 +24,8 @@ bun add @effect/platform
 Here's a minimal example to get you started:
 
 ```typescript
-import { LanguageModel } from "@src/ariadne"
-import { DedalusClient, DedalusLanguageModel } from "@src/dedalus-labs"
+import { LanguageModel } from "@luketandjung/ariadne"
+import { DedalusClient, DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient"
 import { Effect, Layer } from "effect"
 import * as Redacted from "effect/Redacted"

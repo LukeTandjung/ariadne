@@ -5,7 +5,7 @@ Ariadne provides structured error types that integrate with Effect's error handl
 ## Error Types
 
 ```typescript
-import { AiError } from "@src/ariadne"
+import { AiError } from "@luketandjung/ariadne"
 
 type AiError =
   | AiError.HttpRequestError    // Network/request failures
@@ -260,7 +260,7 @@ const program = LanguageModel.generateText({
 When accessing a persisted chat that doesn't exist:
 
 ```typescript
-import { Chat } from "@src/ariadne"
+import { Chat } from "@luketandjung/ariadne"
 
 const program = Effect.gen(function* () {
   const persistence = yield* Chat.Persistence

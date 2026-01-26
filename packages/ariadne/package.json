@@ -1,5 +1,5 @@
 {
-    "name": "@src/ariadne",
+    "name": "@luketandjung/ariadne",
     "version": "0.1.0",
     "type": "module",
     "description": "A composable, structured, effectful agent SDK built off the backs of the Dedalus Labs backend",

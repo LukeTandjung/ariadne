@@ -39,8 +39,8 @@ bun install ariadne
 ## Quick Start
 
 ```typescript
-import { LanguageModel, Tool, Toolkit } from "@src/ariadne"
-import { DedalusClient, DedalusLanguageModel } from "@src/dedalus-labs"
+import { LanguageModel, Tool, Toolkit } from "@luketandjung/ariadne"
+import { DedalusClient, DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient"
 import { Effect, Layer, Schema } from "effect"
 import * as Redacted from "effect/Redacted"

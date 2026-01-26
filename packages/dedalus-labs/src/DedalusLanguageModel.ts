@@ -9,7 +9,7 @@ import {
   McpRegistry,
   type Response,
   Tool,
-} from "@src/ariadne";
+} from "@luketandjung/ariadne";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";

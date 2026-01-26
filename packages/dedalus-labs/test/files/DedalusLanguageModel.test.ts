@@ -4,7 +4,7 @@ import * as HttpClientResponse from "@effect/platform/HttpClientResponse";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Schema from "effect/Schema";
-import { LanguageModel, IdGenerator, Tool, Toolkit } from "@src/ariadne";
+import { LanguageModel, IdGenerator, Tool, Toolkit } from "@luketandjung/ariadne";
 import * as DedalusClient from "../../src/DedalusClient.js";
 import * as DedalusLanguageModel from "../../src/DedalusLanguageModel.js";
 import * as Generated from "../../src/Generated.js";

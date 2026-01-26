@@ -1,7 +1,7 @@
 /**
  * @since 1.0.0
  */
-import { Model as AiModel, EmbeddingModel } from "@src/ariadne";
+import { Model as AiModel, EmbeddingModel } from "@luketandjung/ariadne";
 import * as Context from "effect/Context";
 import type * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";

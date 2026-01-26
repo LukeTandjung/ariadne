@@ -1,6 +1,6 @@
 # API Reference
 
-## @src/ariadne Exports
+## @luketandjung/ariadne Exports
 
 ### Modules
 
@@ -182,7 +182,7 @@ type AiError = HttpRequestError | HttpResponseError | MalformedInput | Malformed
 
 ---
 
-## @src/dedalus-labs Exports
+## @luketandjung/dedalus-labs Exports
 
 ### Modules
 

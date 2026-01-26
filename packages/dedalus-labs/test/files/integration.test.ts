@@ -13,7 +13,7 @@ import {
   Tool,
   Toolkit,
   McpRegistry,
-} from "@src/ariadne";
+} from "@luketandjung/ariadne";
 import * as DedalusClient from "../../src/DedalusClient.js";
 import * as DedalusEmbeddingModel from "../../src/DedalusEmbeddingModel.js";
 import * as DedalusLanguageModel from "../../src/DedalusLanguageModel.js";

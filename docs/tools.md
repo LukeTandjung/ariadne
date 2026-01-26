@@ -5,7 +5,7 @@ Tools allow language models to perform actions like calling APIs, querying datab
 ## Defining a Tool
 
 ```typescript
-import { Tool } from "@src/ariadne"
+import { Tool } from "@luketandjung/ariadne"
 import { Schema } from "effect"
 
 const GetWeather = Tool.make("GetWeather", {
@@ -30,7 +30,7 @@ const GetWeather = Tool.make("GetWeather", {
 Group related tools into a toolkit:
 
 ```typescript
-import { Toolkit } from "@src/ariadne"
+import { Toolkit } from "@luketandjung/ariadne"
 
 const WeatherToolkit = Toolkit.make(GetWeather, GetForecast)
 ```

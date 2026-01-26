@@ -9,7 +9,7 @@ The `ExecutionPlan` module from Effect provides a robust method for creating **s
 Imagine your AI program can fail with domain-specific errors:
 
 ```typescript
-import { LanguageModel } from "@src/ariadne"
+import { LanguageModel } from "@luketandjung/ariadne"
 import { Data, Effect } from "effect"
 
 class NetworkError extends Data.TaggedError("NetworkError") {}
@@ -33,7 +33,7 @@ Use `ExecutionPlan.make` to define retry and fallback behavior:
 
 ```typescript
 import { ExecutionPlan, Schedule } from "effect"
-import { DedalusLanguageModel } from "@src/dedalus-labs"
+import { DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 
 const DadJokePlan = ExecutionPlan.make({
   provide: DedalusLanguageModel.model("openai/gpt-4o"),
@@ -101,8 +101,8 @@ const ResilientPlan = ExecutionPlan.make(
 ## Complete Example
 
 ```typescript
-import { LanguageModel } from "@src/ariadne"
-import { DedalusClient, DedalusLanguageModel } from "@src/dedalus-labs"
+import { LanguageModel } from "@luketandjung/ariadne"
+import { DedalusClient, DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 import { NodeHttpClient } from "@effect/platform-node"
 import { Config, Data, Effect, ExecutionPlan, Layer, Schedule } from "effect"
 

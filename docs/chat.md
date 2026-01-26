@@ -15,8 +15,8 @@ When using `LanguageModel.generateText()` directly, each call is independent - t
 ## Complete Example
 
 ```typescript
-import { Chat, LanguageModel } from "@src/ariadne"
-import { DedalusClient, DedalusLanguageModel } from "@src/dedalus-labs"
+import { Chat, LanguageModel } from "@luketandjung/ariadne"
+import { DedalusClient, DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient"
 import { Effect, Layer } from "effect"
 import * as Redacted from "effect/Redacted"

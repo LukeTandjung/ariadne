@@ -1,9 +1,9 @@
 {
-    "name": "@src/dedalus-labs",
+    "name": "@luketandjung/dedalus-labs",
     "module": "index.ts",
     "type": "module",
     "dependencies": {
-        "@src/ariadne": "workspace:*",
+        "@luketandjung/ariadne": "workspace:*",
         "@effect/experimental": "^0.58.0",
         "@effect/platform": "^0.94.1",
         "effect": "^3.19.14"

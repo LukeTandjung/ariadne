@@ -17,7 +17,7 @@ The `AgentRunner.ReAct` layer enables this multi-turn loop pattern.
 ## Basic Usage
 
 ```typescript
-import { AgentRunner, LanguageModel, Toolkit, Tool } from "@src/ariadne"
+import { AgentRunner, LanguageModel, Toolkit, Tool } from "@luketandjung/ariadne"
 import { Effect, Schema } from "effect"
 
 // Define tools
@@ -96,7 +96,7 @@ The `AgentRunner.ReAct` layer intercepts `LanguageModel` calls and runs them in 
 ### Default Configuration
 
 ```typescript
-import { AgentRunner } from "@src/ariadne"
+import { AgentRunner } from "@luketandjung/ariadne"
 
 program.pipe(
   Effect.provide(AgentRunner.defaultConfig),  // maxTurns: 10
@@ -106,7 +106,7 @@ program.pipe(
 ### Custom Configuration
 
 ```typescript
-import { AgentRunner } from "@src/ariadne"
+import { AgentRunner } from "@luketandjung/ariadne"
 import { Layer } from "effect"
 
 // Set a custom maximum number of turns
@@ -222,7 +222,7 @@ console.log(result.value)
 AgentRunner works seamlessly with MCP (Model Context Protocol) servers:
 
 ```typescript
-import { McpRegistry } from "@src/ariadne"
+import { McpRegistry } from "@luketandjung/ariadne"
 
 const program = LanguageModel.generateText({
   prompt: "Search for Effect TypeScript tutorials",

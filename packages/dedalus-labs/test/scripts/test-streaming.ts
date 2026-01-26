@@ -8,7 +8,7 @@ import * as Option from "effect/Option";
 import * as Stream from "effect/Stream";
 import * as Layer from "effect/Layer";
 import * as Redacted from "effect/Redacted";
-import { LanguageModel, IdGenerator } from "@src/ariadne";
+import { LanguageModel, IdGenerator } from "@luketandjung/ariadne";
 import * as DedalusClient from "../../src/DedalusClient.js";
 import * as DedalusLanguageModel from "../../src/DedalusLanguageModel.js";
 

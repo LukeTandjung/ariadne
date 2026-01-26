@@ -7,7 +7,7 @@ The `DedalusClient` is the HTTP client for communicating with the Dedalus Labs A
 ### Basic Configuration
 
 ```typescript
-import { DedalusClient } from "@src/dedalus-labs"
+import { DedalusClient } from "@luketandjung/dedalus-labs"
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient"
 import { Layer } from "effect"
 import * as Redacted from "effect/Redacted"
@@ -72,7 +72,7 @@ const Dedalus = DedalusClient.layerConfig({
 ### Basic Model
 
 ```typescript
-import { DedalusLanguageModel } from "@src/dedalus-labs"
+import { DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 
 const Gpt4o = DedalusLanguageModel.model("openai/gpt-4o")
 ```
@@ -108,7 +108,7 @@ interface Config.Service {
 Override configuration for specific calls using `withConfigOverride`:
 
 ```typescript
-import { DedalusLanguageModel } from "@src/dedalus-labs"
+import { DedalusLanguageModel } from "@luketandjung/dedalus-labs"
 
 const program = LanguageModel.generateText({
   prompt: "Be creative!",
@@ -205,7 +205,7 @@ program.pipe(
 ## Embedding Model Configuration
 
 ```typescript
-import { DedalusEmbeddingModel } from "@src/dedalus-labs"
+import { DedalusEmbeddingModel } from "@luketandjung/dedalus-labs"
 
 // Basic
 const Embeddings = DedalusEmbeddingModel.model("openai/text-embedding-3-small")

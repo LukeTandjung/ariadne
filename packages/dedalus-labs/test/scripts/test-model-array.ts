@@ -5,7 +5,7 @@ import * as FetchHttpClient from "@effect/platform/FetchHttpClient";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Redacted from "effect/Redacted";
-import { LanguageModel, IdGenerator, McpRegistry } from "@src/ariadne";
+import { LanguageModel, IdGenerator, McpRegistry } from "@luketandjung/ariadne";
 import * as DedalusClient from "../../src/DedalusClient.js";
 import * as DedalusLanguageModel from "../../src/DedalusLanguageModel.js";
 

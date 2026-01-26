@@ -9,7 +9,7 @@ The `LanguageModel` module provides the core interface for text generation, stru
 Generate text from a prompt:
 
 ```typescript
-import { LanguageModel } from "@src/ariadne"
+import { LanguageModel } from "@luketandjung/ariadne"
 import { Effect } from "effect"
 
 const program = Effect.gen(function* () {
@@ -39,7 +39,7 @@ const response = yield* LanguageModel.generateText({
 For complex conversations, use structured prompts:
 
 ```typescript
-import { Prompt } from "@src/ariadne"
+import { Prompt } from "@luketandjung/ariadne"
 
 const conversation = Prompt.make([
   { role: "system", content: "You are a math tutor." },
@@ -77,7 +77,7 @@ Generate typed, validated objects instead of raw text.
 ### generateObject
 
 ```typescript
-import { LanguageModel } from "@src/ariadne"
+import { LanguageModel } from "@luketandjung/ariadne"
 import { Schema } from "effect"
 
 const PersonSchema = Schema.Struct({

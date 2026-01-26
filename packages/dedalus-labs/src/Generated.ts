@@ -5,7 +5,7 @@ import type * as HttpClient from "@effect/platform/HttpClient";
 import * as HttpClientError from "@effect/platform/HttpClientError";
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse";
-import { AiError } from "@src/ariadne";
+import { AiError } from "@luketandjung/ariadne";
 import * as Effect from "effect/Effect";
 import type { ParseError } from "effect/ParseResult";
 import * as S from "effect/Schema";

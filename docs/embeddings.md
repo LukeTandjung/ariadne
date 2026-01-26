@@ -5,8 +5,8 @@ Generate vector embeddings for semantic search, similarity, and clustering.
 ## Basic Usage
 
 ```typescript
-import { EmbeddingModel } from "@src/ariadne"
-import { DedalusClient, DedalusEmbeddingModel } from "@src/dedalus-labs"
+import { EmbeddingModel } from "@luketandjung/ariadne"
+import { DedalusClient, DedalusEmbeddingModel } from "@luketandjung/dedalus-labs"
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient"
 import { Effect, Layer } from "effect"
 
@@ -117,7 +117,7 @@ DedalusEmbeddingModel.model("openai/text-embedding-ada-002")
 Override configuration for specific calls:
 
 ```typescript
-import { DedalusEmbeddingModel } from "@src/dedalus-labs"
+import { DedalusEmbeddingModel } from "@luketandjung/dedalus-labs"
 
 const program = model.embed("text")
 

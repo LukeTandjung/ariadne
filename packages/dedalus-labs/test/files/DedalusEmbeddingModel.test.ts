@@ -3,7 +3,7 @@ import * as HttpClient from "@effect/platform/HttpClient";
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import { EmbeddingModel } from "@src/ariadne";
+import { EmbeddingModel } from "@luketandjung/ariadne";
 import * as DedalusClient from "../../src/DedalusClient.js";
 import * as DedalusEmbeddingModel from "../../src/DedalusEmbeddingModel.js";
 import * as Generated from "../../src/Generated.js";

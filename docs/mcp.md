@@ -18,7 +18,7 @@ This means:
 ## Using Marketplace MCP Servers
 
 ```typescript
-import { McpRegistry, LanguageModel } from "@src/ariadne"
+import { McpRegistry, LanguageModel } from "@luketandjung/ariadne"
 
 const response = yield* LanguageModel.generateText({
   prompt: "Search for TypeScript 5.7 features",
@@ -43,7 +43,7 @@ const response = yield* LanguageModel.generateText({
 ## Combining MCP with Local Tools
 
 ```typescript
-import { Tool, Toolkit, McpRegistry, LanguageModel } from "@src/ariadne"
+import { Tool, Toolkit, McpRegistry, LanguageModel } from "@luketandjung/ariadne"
 
 // Define a local tool
 const Calculator = Tool.make("Calculator", {

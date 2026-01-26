@@ -5,7 +5,7 @@ import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
 /**
  * @since 1.0.0
  */
-import { AiError } from "@src/ariadne";
+import { AiError } from "@luketandjung/ariadne";
 import * as Config from "effect/Config";
 import type { ConfigError } from "effect/ConfigError";
 import * as Context from "effect/Context";
