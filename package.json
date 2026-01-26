@@ -14,7 +14,7 @@
         "test:watch": "bun test --watch",
         "test:coverage": "bun test --coverage",
         "release": "bumpp -r --commit --push --tag",
-        "prepare": "husky"
+        "prepare": "husky && effect-language-service patch"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.8.0",

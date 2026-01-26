@@ -26,7 +26,7 @@
       },
     },
     "packages/ariadne": {
-      "name": "@src/ariadne",
+      "name": "@luketandjung/ariadne",
       "version": "0.1.0",
       "dependencies": {
         "@effect/experimental": "^0.58.0",
@@ -37,11 +37,11 @@
       },
     },
     "packages/dedalus-labs": {
-      "name": "@src/dedalus-labs",
+      "name": "@luketandjung/dedalus-labs",
       "dependencies": {
         "@effect/experimental": "^0.58.0",
         "@effect/platform": "^0.94.1",
-        "@src/ariadne": "workspace:*",
+        "@luketandjung/ariadne": "workspace:*",
         "effect": "^3.19.14",
       },
       "devDependencies": {
@@ -211,6 +211,10 @@
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
+    "@luketandjung/ariadne": ["@luketandjung/ariadne@workspace:packages/ariadne"],
+
+    "@luketandjung/dedalus-labs": ["@luketandjung/dedalus-labs@workspace:packages/dedalus-labs"],
+
     "@msgpackr-extract/msgpackr-extract-darwin-arm64": ["@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3", "", { "os": "darwin", "cpu": "arm64" }, "sha512-QZHtlVgbAdy2zAqNA9Gu1UpIuI8Xvsd1v8ic6B2pZmeFnFcMWiPLfWXh7TVw4eGEZ/C9TH281KwhVoeQUKbyjw=="],
 
     "@msgpackr-extract/msgpackr-extract-darwin-x64": ["@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.3", "", { "os": "darwin", "cpu": "x64" }, "sha512-mdzd3AVzYKuUmiWOQ8GNhl64/IoFGol569zNRdkLReh6LRLHOXxU4U8eq0JwaD8iFHdVGqSy4IjFL4reoWCDFw=="],
@@ -348,10 +352,6 @@
     "@rollup/rollup-win32-x64-gnu": ["@rollup/rollup-win32-x64-gnu@4.55.1", "", { "os": "win32", "cpu": "x64" }, "sha512-xGGY5pXj69IxKb4yv/POoocPy/qmEGhimy/FoTpTSVju3FYXUQQMFCaZZXJVidsmGxRioZAwpThl/4zX41gRKg=="],
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.55.1", "", { "os": "win32", "cpu": "x64" }, "sha512-SPEpaL6DX4rmcXtnhdrQYgzQ5W2uW3SCJch88lB2zImhJRhIIK44fkUrgIV/Q8yUNfw5oyZ5vkeQsZLhCb06lw=="],
-
-    "@src/ariadne": ["@src/ariadne@workspace:packages/ariadne"],
-
-    "@src/dedalus-labs": ["@src/dedalus-labs@workspace:packages/dedalus-labs"],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
