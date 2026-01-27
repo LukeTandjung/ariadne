@@ -1,6 +1,6 @@
 {
     "name": "@luketandjung/ariadne",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "module",
     "description": "A composable, structured, effectful agent SDK built off the backs of the Dedalus Labs backend",
     "main": "./dist/index.cjs",

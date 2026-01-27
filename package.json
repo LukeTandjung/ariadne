@@ -14,9 +14,12 @@
         "test:watch": "bun test --watch",
         "test:coverage": "bun test --coverage",
         "release": "bumpp -r --commit --push --tag",
-        "prepare": "husky && effect-language-service patch"
+        "prepare": "husky && effect-language-service patch",
+        "ci:version": "changeset version && bun update",
+        "ci:publish": "for dir in packages/*; do (cd \"$dir\" && bun publish || true); done && changeset tag"
     },
     "devDependencies": {
+        "@changesets/cli": "^2.29.8",
         "@commitlint/cli": "^19.8.0",
         "@commitlint/config-conventional": "^19.8.0",
         "@effect/eslint-plugin": "^0.3.2",

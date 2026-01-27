@@ -1,35 +1,37 @@
 name: Release
 
-permissions:
-      contents: write
-      id-token: write
-
 on:
-      push:
-            tags:
-                  - 'v*'
+    push:
+        branches:
+            - master
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-      release:
-            runs-on: ubuntu-latest
-            steps:
-                  - uses: actions/checkout@v4
-                    with:
-                          fetch-depth: 0
-                  - uses: actions/setup-node@v4
-                    with:
-                          node-version: lts/*
-                          registry-url: https://registry.npmjs.org/
-                  - uses: oven-sh/setup-bun@v1
-                    with:
-                          bun-version: latest
-                  - run: bun install
-                  - run: bun run build
-                  - run: npx changelogithub
-                    continue-on-error: true
-                    env:
-                          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-                  - run: bun run publish:ci
-                    env:
-                          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
-                          NPM_CONFIG_PROVENANCE: true
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  registry-url: https://registry.npmjs.org/
+
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+
+            - run: bun install --frozen-lockfile
+
+            - run: bun run build
+
+            - uses: changesets/action@v1
+              with:
+                  version: bun run ci:version
+                  publish: bun run ci:publish
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
