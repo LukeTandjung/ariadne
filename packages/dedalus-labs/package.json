@@ -1,6 +1,6 @@
 {
     "name": "@luketandjung/dedalus-labs",
-    "version": "1.0.2",
+    "version": "2.0.0",
     "type": "module",
     "description": "Dedalus Labs AI provider for the Ariadne agent SDK",
     "main": "./dist/index.cjs",
@@ -19,7 +19,9 @@
             }
         }
     },
-    "files": ["dist"],
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "bunup",
         "dev": "bunup --watch",
