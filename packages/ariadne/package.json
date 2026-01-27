@@ -1,6 +1,6 @@
 {
     "name": "@luketandjung/ariadne",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "description": "A composable, structured, effectful agent SDK built off the backs of the Dedalus Labs backend",
     "main": "./dist/index.cjs",
@@ -8,9 +8,16 @@
     "types": "./dist/index.d.ts",
     "exports": {
         "./package.json": "./package.json",
-        ".": "./src/index.ts",
-        "./*": "./src/*.ts",
-        "./internal/*": null
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.cjs"
+            }
+        }
     },
     "files": ["dist"],
     "scripts": {
@@ -33,19 +40,6 @@
     },
     "homepage": "https://github.com/LukeTandjung/ariadne#readme",
     "publishConfig": {
-        "access": "public",
-        "exports": {
-            "./package.json": "./package.json",
-            ".": {
-                "import": {
-                    "types": "./dist/index.d.ts",
-                    "default": "./dist/index.js"
-                },
-                "require": {
-                    "types": "./dist/index.d.ts",
-                    "default": "./dist/index.cjs"
-                }
-            }
-        }
+        "access": "public"
     }
 }
