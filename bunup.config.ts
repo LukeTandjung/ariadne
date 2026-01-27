@@ -7,7 +7,7 @@ export default defineWorkspace([
         config: {
             entry: ["src/index.ts"],
             format: ["esm", "cjs"],
-            dts: { isolatedDeclarations: false },
+            dts: { inferTypes: true },
         },
     },
     {
@@ -16,7 +16,7 @@ export default defineWorkspace([
         config: {
             entry: ["src/index.ts"],
             format: ["esm", "cjs"],
-            dts: { isolatedDeclarations: false },
+            dts: { inferTypes: true },
         },
     },
 ]);
