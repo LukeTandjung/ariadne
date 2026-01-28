@@ -1,5 +1,12 @@
 # @luketandjung/dedalus-labs
 
+## 2.1.2
+
+### Patch Changes
+
+- Updated dependencies [a153e9c]
+  - @luketandjung/ariadne@2.1.2
+
 ## 2.1.1
 
 ### Patch Changes
