@@ -1,5 +1,11 @@
 # @luketandjung/ariadne
 
+## 2.1.0
+
+### Minor Changes
+
+- fa9c0f9: updated to use effect dependency from user instead of from the package itself
+
 ## 2.0.0
 
 ### Major Changes
