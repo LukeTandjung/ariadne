@@ -43,10 +43,12 @@ const program = LanguageModel.generateText({
   prompt: "What is the capital of France?",
 })
 
-// 4. Run the program
+// 4. Compose layers
+const MainLayer = Gpt4o.pipe(Layer.provide(Dedalus))
+
+// 5. Run the program
 const result = await program.pipe(
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 
@@ -81,11 +83,11 @@ const Gpt4o = DedalusLanguageModel.model("openai/gpt-4o")
 // Client provides DedalusClient service
 const Dedalus = DedalusClient.layer({ apiKey: ... })
 
-// Compose layers and provide to your program
-program.pipe(
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
-)
+// Compose layers using Layer.provide (models dependency graph)
+const MainLayer = Gpt4o.pipe(Layer.provide(Dedalus))
+
+// Provide composed layer to your program
+program.pipe(Effect.provide(MainLayer))
 ```
 
 ### The Model Type

@@ -82,11 +82,15 @@ const program = LanguageModel.generateText({
   toolkit,
 })
 
-// 5. Run
+// 5. Compose layers
+const MainLayer = toolkitLive.pipe(
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
+// 6. Run
 const result = await program.pipe(
-  Effect.provide(toolkitLive),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 

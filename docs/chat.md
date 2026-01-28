@@ -45,10 +45,11 @@ const program = Effect.gen(function* () {
   console.log(r2.text) // "Your name is Alice."
 })
 
-// 3. Run with model and client
+// 3. Compose layers and run
+const MainLayer = Gpt4o.pipe(Layer.provide(Dedalus))
+
 program.pipe(
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 ```
@@ -209,11 +210,14 @@ const program = Effect.gen(function* () {
   yield* chat.save
 })
 
+const MainLayer = Chat.layerPersisted({ storeId: "my-chats" }).pipe(
+  Layer.provide(yourBackingPersistenceLayer),
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 program.pipe(
-  Effect.provide(Chat.layerPersisted({ storeId: "my-chats" })),
-  Effect.provide(yourBackingPersistenceLayer),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 ```

@@ -45,12 +45,15 @@ const program = LanguageModel.generateText({
 })
 
 // Add AgentRunner.ReAct to enable multi-turn loop
+const MainLayer = ResearchToolkitLive.pipe(
+  Layer.provide(AgentRunner.ReAct),
+  Layer.provide(AgentRunner.defaultConfig),
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 const result = await program.pipe(
-  Effect.provide(ResearchToolkitLive),
-  Effect.provide(AgentRunner.ReAct),
-  Effect.provide(AgentRunner.defaultConfig),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 
@@ -114,10 +117,9 @@ const customConfig = Layer.succeed(AgentRunner.Config, {
   maxTurns: 20,
 })
 
-program.pipe(
-  Effect.provide(AgentRunner.ReAct),
-  Effect.provide(customConfig),
-)
+const AgentLayer = AgentRunner.ReAct.pipe(Layer.provide(customConfig))
+
+program.pipe(Effect.provide(AgentLayer))
 ```
 
 ### Configuration Options
@@ -148,12 +150,15 @@ const stream = LanguageModel.streamText({
   toolkit: ResearchToolkit,
 })
 
+const MainLayer = ResearchToolkitLive.pipe(
+  Layer.provide(AgentRunner.ReAct),
+  Layer.provide(AgentRunner.defaultConfig),
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 yield* stream.pipe(
-  Effect.provide(ResearchToolkitLive),
-  Effect.provide(AgentRunner.ReAct),
-  Effect.provide(AgentRunner.defaultConfig),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Stream.tap((part) =>
     Effect.sync(() => {
       switch (part.type) {
@@ -198,12 +203,15 @@ const program = LanguageModel.generateObject({
   toolkit: ResearchToolkit,
 })
 
+const MainLayer = ResearchToolkitLive.pipe(
+  Layer.provide(AgentRunner.ReAct),
+  Layer.provide(AgentRunner.defaultConfig),
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 const result = await program.pipe(
-  Effect.provide(ResearchToolkitLive),
-  Effect.provide(AgentRunner.ReAct),
-  Effect.provide(AgentRunner.defaultConfig),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 
@@ -232,12 +240,15 @@ const program = LanguageModel.generateText({
   ],
 })
 
+const MainLayer = LocalToolkitLive.pipe(
+  Layer.provide(AgentRunner.ReAct),
+  Layer.provide(AgentRunner.defaultConfig),
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 const result = await program.pipe(
-  Effect.provide(LocalToolkitLive),
-  Effect.provide(AgentRunner.ReAct),
-  Effect.provide(AgentRunner.defaultConfig),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 ```
@@ -249,13 +260,16 @@ MCP tools execute server-side, and the loop continues based on whether there are
 ### Without AgentRunner (Single Turn)
 
 ```typescript
+const MainLayer = ResearchToolkitLive.pipe(
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 const result = await LanguageModel.generateText({
   prompt: "Research Tokyo weather and find news",
   toolkit: ResearchToolkit,
 }).pipe(
-  Effect.provide(ResearchToolkitLive),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 
@@ -266,15 +280,18 @@ const result = await LanguageModel.generateText({
 ### With AgentRunner (Multi-Turn Loop)
 
 ```typescript
+const MainLayer = ResearchToolkitLive.pipe(
+  Layer.provide(AgentRunner.ReAct),        // Add AgentRunner
+  Layer.provide(AgentRunner.defaultConfig),
+  Layer.provide(Gpt4o),
+  Layer.provide(Dedalus),
+)
+
 const result = await LanguageModel.generateText({
   prompt: "Research Tokyo weather and find news",
   toolkit: ResearchToolkit,
 }).pipe(
-  Effect.provide(ResearchToolkitLive),
-  Effect.provide(AgentRunner.ReAct),     // Add this
-  Effect.provide(AgentRunner.defaultConfig),
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 
@@ -313,9 +330,10 @@ const GoodTool = Tool.make("AnalyzeData", {
 For agents that might run for a while, consider adding timeouts:
 
 ```typescript
+const AgentLayer = AgentRunner.ReAct.pipe(Layer.provide(AgentRunner.defaultConfig))
+
 const result = await program.pipe(
-  Effect.provide(AgentRunner.ReAct),
-  Effect.provide(AgentRunner.defaultConfig),
+  Effect.provide(AgentLayer),
   Effect.timeout("5 minutes"),
   Effect.runPromise,
 )
@@ -326,8 +344,13 @@ const result = await program.pipe(
 Each turn consumes tokens. The final response includes aggregated usage:
 
 ```typescript
+const AgentLayer = AgentRunner.ReAct.pipe(
+  Layer.provide(AgentRunner.defaultConfig),
+  // ... other layers
+)
+
 const result = await program.pipe(
-  Effect.provide(AgentRunner.ReAct),
+  Effect.provide(AgentLayer),
   Effect.runPromise,
 )
 

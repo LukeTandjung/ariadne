@@ -120,10 +120,11 @@ const creative = DedalusLanguageModel.withConfigOverride(
   program,
 )
 
-// Run with override
+// Compose layers and run with override
+const MainLayer = Gpt4o.pipe(Layer.provide(Dedalus))
+
 creative.pipe(
-  Effect.provide(Gpt4o),
-  Effect.provide(Dedalus),
+  Effect.provide(MainLayer),
   Effect.runPromise,
 )
 ```
@@ -196,10 +197,7 @@ const program = Effect.gen(function* () {
   return { quickResponse, detailedResponse }
 })
 
-program.pipe(
-  Effect.provide(Dedalus),
-  Effect.runPromise,
-)
+program.pipe(Effect.provide(Dedalus), Effect.runPromise)
 ```
 
 ## Embedding Model Configuration
