@@ -87,8 +87,8 @@ describe("DedalusEmbeddingModel", () => {
 
       const result = await program.pipe(
         Effect.provide(
-          DedalusEmbeddingModel.layerBatched({
-            model: "openai/text-embedding-3-small",
+          DedalusEmbeddingModel.model("openai/text-embedding-3-small", {
+            mode: "batched",
           }),
         ),
         Effect.provide(DedalusClient.layer({})),
@@ -107,8 +107,8 @@ describe("DedalusEmbeddingModel", () => {
 
       const result = await program.pipe(
         Effect.provide(
-          DedalusEmbeddingModel.layerBatched({
-            model: "openai/text-embedding-3-small",
+          DedalusEmbeddingModel.model("openai/text-embedding-3-small", {
+            mode: "batched",
           }),
         ),
         Effect.provide(DedalusClient.layer({})),

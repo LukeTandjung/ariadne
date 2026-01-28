@@ -5,8 +5,8 @@
     "type": "module",
     "workspaces": ["packages/*"],
     "scripts": {
-        "build": "bunup",
-        "dev": "bunup --watch",
+        "build": "tsc --build",
+        "dev": "tsc --build --watch",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "tsc": "tsc --build",
@@ -29,7 +29,6 @@
         "@typescript-eslint/eslint-plugin": "^8.54.0",
         "@typescript-eslint/parser": "^8.54.0",
         "bumpp": "^10.4.0",
-        "bunup": "^0.16.20",
         "eslint": "^9.39.2",
         "husky": "^9.1.7",
         "typescript": "^5.9.3",

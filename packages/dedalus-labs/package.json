@@ -3,28 +3,21 @@
     "version": "2.1.0",
     "type": "module",
     "description": "Dedalus Labs AI provider for the Ariadne agent SDK",
-    "main": "./dist/index.cjs",
-    "module": "./dist/index.js",
+    "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "import": {
-                "types": "./dist/index.d.ts",
-                "default": "./dist/index.js"
-            },
-            "require": {
-                "types": "./dist/index.d.ts",
-                "default": "./dist/index.cjs"
-            }
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
         }
     },
     "files": [
         "dist"
     ],
     "scripts": {
-        "build": "bunup",
-        "dev": "bunup --watch",
+        "build": "tsc --build",
+        "dev": "tsc --build --watch",
         "test": "bun test"
     },
     "dependencies": {

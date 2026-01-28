@@ -162,7 +162,7 @@ describe("DedalusLanguageModel", () => {
       });
 
       const result = await program.pipe(
-        Effect.provide(DedalusLanguageModel.layer({ model: "openai/gpt-4o" })),
+        Effect.provide(DedalusLanguageModel.model("openai/gpt-4o")),
         Effect.provide(DedalusClient.layer({})),
         Effect.provide(createMockHttpClient(mockChatCompletion)),
         Effect.provide(
@@ -185,7 +185,7 @@ describe("DedalusLanguageModel", () => {
       });
 
       const result = await program.pipe(
-        Effect.provide(DedalusLanguageModel.layer({ model: "openai/gpt-4o" })),
+        Effect.provide(DedalusLanguageModel.model("openai/gpt-4o")),
         Effect.provide(DedalusClient.layer({})),
         Effect.provide(createMockHttpClient(mockChatCompletionWithToolCall)),
         Effect.provide(
@@ -213,7 +213,7 @@ describe("DedalusLanguageModel", () => {
       });
 
       const result = await program.pipe(
-        Effect.provide(DedalusLanguageModel.layer({ model: "openai/gpt-4o" })),
+        Effect.provide(DedalusLanguageModel.model("openai/gpt-4o")),
         Effect.provide(DedalusClient.layer({})),
         Effect.provide(
           createMockHttpClient(mockChatCompletionWithCustomToolCall),
@@ -311,7 +311,7 @@ describe("DedalusLanguageModel", () => {
       });
 
       const result = await program.pipe(
-        Effect.provide(DedalusLanguageModel.layer({ model: "openai/gpt-4o" })),
+        Effect.provide(DedalusLanguageModel.model("openai/gpt-4o")),
         Effect.provide(DedalusClient.layer({})),
         Effect.provide(mockErrorClient),
         Effect.provide(
