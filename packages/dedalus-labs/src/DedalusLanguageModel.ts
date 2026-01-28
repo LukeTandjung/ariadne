@@ -436,6 +436,7 @@ const makeResponse: (
             id: toolCall.id,
             name: toolName,
             params,
+            providerExecuted: true,
           });
         }
       }
@@ -467,19 +468,6 @@ const makeResponse: (
         },
       },
     });
-  }
-
-  // Handle MCP tool executions (server-side executed tools)
-  if (response.tools_executed && response.tools_executed.length > 0) {
-    for (const toolName of response.tools_executed) {
-      parts.push({
-        type: "tool-call",
-        id: yield* idGenerator.generateId(),
-        name: toolName,
-        params: {},
-        providerExecuted: true,
-      });
-    }
   }
 
   return parts;
