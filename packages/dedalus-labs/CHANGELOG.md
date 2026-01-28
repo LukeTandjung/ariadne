@@ -1,5 +1,11 @@
 # @luketandjung/dedalus-labs
 
+## 2.1.3
+
+### Patch Changes
+
+- 7e8225f: Fixed MCP execution by adding providerExecuted
+
 ## 2.1.2
 
 ### Patch Changes
