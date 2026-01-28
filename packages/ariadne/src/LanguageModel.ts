@@ -967,9 +967,14 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
             providerOptions.tools = tools;
             providerOptions.toolChoice = toolChoice;
 
+            // Check if MCP servers are configured
+            const hasMcpServers =
+                options.mcpServers !== undefined &&
+                options.mcpServers.length > 0;
+
             // Construct the response schema with the tools from the toolkit
             const ResponseSchema = Schema.mutable(
-                Schema.Array(Response.Part(toolkit)),
+                Schema.Array(Response.Part(toolkit, { hasMcpServers })),
             );
 
             // If tool call resolution is disabled, return the response without
@@ -1086,11 +1091,16 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
             providerOptions.tools = tools;
             providerOptions.toolChoice = toolChoice;
 
+            // Check if MCP servers are configured
+            const hasMcpServers =
+                options.mcpServers !== undefined &&
+                options.mcpServers.length > 0;
+
             // If tool call resolution is disabled, return the response without
             // resolving the tool calls that were generated
             if (options.disableToolCallResolution === true) {
                 const schema = Schema.ChunkFromSelf(
-                    Response.StreamPart(toolkit),
+                    Response.StreamPart(toolkit, { hasMcpServers }),
                 );
                 const decode = Schema.decode(schema);
                 return params
@@ -1106,7 +1116,9 @@ export const make: (params: ConstructorParams) => Effect.Effect<Service> =
                 Response.StreamPart<Tools>,
                 AiError.AiError | ParseResult.ParseError
             >();
-            const ResponseSchema = Schema.Array(Response.StreamPart(toolkit));
+            const ResponseSchema = Schema.Array(
+                Response.StreamPart(toolkit, { hasMcpServers }),
+            );
             const decode = Schema.decode(ResponseSchema);
             yield* params.streamText(providerOptions).pipe(
                 Stream.runForEachChunk(

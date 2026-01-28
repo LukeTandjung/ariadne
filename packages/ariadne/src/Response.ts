@@ -209,6 +209,7 @@ export type AllPartsEncoded =
  */
 export const AllParts = <T extends Toolkit.Any | Toolkit.WithHandler<any>>(
     toolkit: T,
+    options?: PartSchemaOptions,
 ): Schema.Schema<
     AllParts<
         T extends Toolkit.Any ? Toolkit.Tools<T> : Toolkit.WithHandlerTools<T>
@@ -229,6 +230,13 @@ export const AllParts = <T extends Toolkit.Any | Toolkit.WithHandler<any>>(
             ToolResultPart(tool.name, tool.successSchema, tool.failureSchema),
         );
     }
+
+    // When MCP servers are present, add fallback schema that accepts any tool name.
+    // Placed after toolkit-specific schemas so local tools match first.
+    if (options?.hasMcpServers) {
+        toolCalls.push(GenericToolCallPart);
+    }
+
     return Schema.Union(
         TextPart,
         TextStartPart,
@@ -303,6 +311,7 @@ export type PartEncoded =
  */
 export const Part = <T extends Toolkit.Any | Toolkit.WithHandler<any>>(
     toolkit: T,
+    options?: PartSchemaOptions,
 ): Schema.Schema<
     Part<
         T extends Toolkit.Any ? Toolkit.Tools<T> : Toolkit.WithHandlerTools<T>
@@ -323,6 +332,13 @@ export const Part = <T extends Toolkit.Any | Toolkit.WithHandler<any>>(
             ToolResultPart(tool.name, tool.successSchema, tool.failureSchema),
         );
     }
+
+    // When MCP servers are present, add fallback schema that accepts any tool name.
+    // Placed after toolkit-specific schemas so local tools match first.
+    if (options?.hasMcpServers) {
+        toolCalls.push(GenericToolCallPart);
+    }
+
     return Schema.Union(
         TextPart,
         ReasoningPart,
@@ -423,6 +439,21 @@ export type StreamObjectPartEncoded =
     | ErrorPartEncoded;
 
 /**
+ * Options for configuring part schema behavior.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export interface PartSchemaOptions {
+    /**
+     * When true, includes a fallback schema that accepts any tool name.
+     * This is necessary when using MCP servers, as MCP tools have dynamic
+     * names that aren't known at compile time.
+     */
+    readonly hasMcpServers?: boolean;
+}
+
+/**
  * Creates a Schema for streaming response parts based on a toolkit.
  *
  * @since 1.0.0
@@ -430,6 +461,7 @@ export type StreamObjectPartEncoded =
  */
 export const StreamPart = <T extends Toolkit.Any | Toolkit.WithHandler<any>>(
     toolkit: T,
+    options?: PartSchemaOptions,
 ): Schema.Schema<
     StreamPart<
         T extends Toolkit.Any ? Toolkit.Tools<T> : Toolkit.WithHandlerTools<T>
@@ -450,6 +482,13 @@ export const StreamPart = <T extends Toolkit.Any | Toolkit.WithHandler<any>>(
             ToolResultPart(tool.name, tool.successSchema, tool.failureSchema),
         );
     }
+
+    // When MCP servers are present, add fallback schema that accepts any tool name.
+    // Placed after toolkit-specific schemas so local tools match first.
+    if (options?.hasMcpServers) {
+        toolCalls.push(GenericToolCallPart);
+    }
+
     return Schema.Union(
         TextStartPart,
         TextDeltaPart,
@@ -1690,6 +1729,34 @@ export const ToolCallPart = <
 export const toolCallPart = <const Name extends string, Params>(
     params: ConstructorParams<ToolCallPart<Name, Params>>,
 ): ToolCallPart<Name, Params> => makePart("tool-call", params);
+
+/**
+ * Generic schema for tool call parts that accepts any tool name.
+ * Used as a fallback when MCP servers are configured, since MCP tools
+ * have dynamic names not known at compile time.
+ *
+ * @since 1.0.0
+ * @category Schemas
+ */
+export const GenericToolCallPart: Schema.Schema<
+    ToolCallPart<string, unknown>,
+    ToolCallPartEncoded
+> = Schema.Struct({
+    type: Schema.Literal("tool-call"),
+    id: Schema.String,
+    name: Schema.String,
+    params: Schema.Unknown,
+    providerName: Schema.optional(Schema.String),
+    providerExecuted: Schema.optionalWith(Schema.Boolean, {
+        default: constFalse,
+    }),
+    metadata: Schema.optionalWith(ProviderMetadata, {
+        default: constEmptyObject,
+    }),
+}).pipe(
+    Schema.attachPropertySignature(PartTypeId, PartTypeId),
+    Schema.annotations({ identifier: "GenericToolCallPart" }),
+);
 
 // =============================================================================
 // Tool Call Result Part
