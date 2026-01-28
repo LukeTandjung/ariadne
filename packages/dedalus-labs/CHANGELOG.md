@@ -1,5 +1,13 @@
 # @luketandjung/dedalus-labs
 
+## 2.1.1
+
+### Patch Changes
+
+- aba27e0: switched from bunup to tsc due to type aliasing bug in bunup
+- Updated dependencies [aba27e0]
+  - @luketandjung/ariadne@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
