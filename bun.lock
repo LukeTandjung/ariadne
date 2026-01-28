@@ -28,7 +28,7 @@
     },
     "packages/ariadne": {
       "name": "@luketandjung/ariadne",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "dependencies": {
         "find-my-way-ts": "^0.1.6",
       },
@@ -47,7 +47,7 @@
     },
     "packages/dedalus-labs": {
       "name": "@luketandjung/dedalus-labs",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "dependencies": {
         "@luketandjung/ariadne": "workspace:*",
       },
