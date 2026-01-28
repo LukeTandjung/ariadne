@@ -28,16 +28,19 @@
         "test": "bun test"
     },
     "dependencies": {
-        "@luketandjung/ariadne": "workspace:*",
-        "@effect/experimental": "^0.58.0",
-        "@effect/platform": "^0.94.1",
-        "effect": "^3.19.14"
-    },
-    "devDependencies": {
-        "@types/bun": "latest"
+        "@luketandjung/ariadne": "workspace:*"
     },
     "peerDependencies": {
+        "@effect/experimental": "^0.58.0",
+        "@effect/platform": "^0.94.1",
+        "effect": "^3.19.14",
         "typescript": "^5"
+    },
+    "devDependencies": {
+        "@effect/experimental": "^0.58.0",
+        "@effect/platform": "^0.94.1",
+        "effect": "^3.19.14",
+        "@types/bun": "latest"
     },
     "license": "MIT",
     "repository": {
