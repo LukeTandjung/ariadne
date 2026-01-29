@@ -1,5 +1,13 @@
 # @luketandjung/dedalus-labs
 
+## 2.1.4
+
+### Patch Changes
+
+- 76c055e: version bump
+- Updated dependencies [76c055e]
+  - @luketandjung/ariadne@2.1.4
+
 ## 2.1.3
 
 ### Patch Changes
