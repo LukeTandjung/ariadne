@@ -114,16 +114,18 @@ export const make = Effect.fnUntraced(function* (options: {
     const { toolChoice, tools } = yield* prepareTools(providerOptions);
     const responseFormat = prepareResponseFormat(providerOptions);
 
+    const hasMcpServers = providerOptions.mcpServers.length > 0;
     const request: typeof Generated.ChatCompletionRequest.Encoded = {
       ...config,
       messages,
       tools,
       tool_choice: toolChoice,
       response_format: responseFormat,
-      mcp_servers:
-        providerOptions.mcpServers.length > 0
-          ? McpRegistry.toApiFormat(providerOptions.mcpServers)
-          : undefined,
+      mcp_servers: hasMcpServers
+        ? McpRegistry.toApiFormat(providerOptions.mcpServers)
+        : undefined,
+      // Ensure MCP tools are auto-executed server-side
+      auto_execute_tools: hasMcpServers ? true : config.auto_execute_tools,
     };
     return request;
   });
@@ -344,6 +346,9 @@ const makeResponse: (
     timestamp: DateTime.formatIso(DateTime.unsafeFromDate(createdAt)),
   });
 
+  // Track MCP tools from tool_calls to avoid duplicates with tools_executed
+  const mcpToolsFromCalls = new Set<string>();
+
   // Process first choice (standard for chat completions)
   const choice = response.choices[0];
   if (choice) {
@@ -388,6 +393,7 @@ const makeResponse: (
     }
 
     // Tool calls
+
     if (message.tool_calls) {
       for (const toolCall of message.tool_calls) {
         if (toolCall.type === "function") {
@@ -414,9 +420,12 @@ const makeResponse: (
             params,
           });
         } else if (toolCall.type === "custom") {
-          // Custom tool calls (e.g., MCP tools) have raw input strings
+          // Custom tool calls are MCP tools executed server-side
           const toolName = toolCall.custom.name;
           const toolInput = toolCall.custom.input;
+
+          // Track this MCP tool to avoid duplicates from tools_executed
+          mcpToolsFromCalls.add(toolName);
 
           const params = yield* Effect.try({
             try: () => Tool.unsafeSecureJsonParse(toolInput),
@@ -436,6 +445,8 @@ const makeResponse: (
             id: toolCall.id,
             name: toolName,
             params,
+            // MCP tools are executed server-side
+            providerExecuted: true,
           });
         }
       }
@@ -470,8 +481,14 @@ const makeResponse: (
   }
 
   // Handle MCP tool executions (server-side executed tools)
+  // Only add tools from tools_executed that weren't already in tool_calls
+  // (avoids duplicates when both are present)
   if (response.tools_executed && response.tools_executed.length > 0) {
     for (const toolName of response.tools_executed) {
+      // Skip if this tool was already processed from tool_calls
+      if (mcpToolsFromCalls.has(toolName)) {
+        continue;
+      }
       parts.push({
         type: "tool-call",
         id: yield* idGenerator.generateId(),

@@ -189,9 +189,19 @@ export const make = (options: {
         Stream.unwrapScoped,
         Stream.decodeText(),
         Stream.pipeThroughChannel(Sse.makeChannel()),
+        // Filter out the [DONE] marker that signals end of SSE stream
+        Stream.filter((event) => event.data !== "[DONE]"),
         Stream.mapEffect((event) => decodeChunk(event.data)),
+        // Don't use takeUntil on finish_reason: "tool_calls" - MCP tools may
+        // continue streaming after the model requests a tool call. Only stop
+        // on terminal finish reasons.
         Stream.takeUntil((chunk) =>
-          chunk.choices.some((choice) => choice.finish_reason !== null),
+          chunk.choices.some(
+            (choice) =>
+              choice.finish_reason === "stop" ||
+              choice.finish_reason === "length" ||
+              choice.finish_reason === "content_filter",
+          ),
         ),
         Stream.catchTags({
           RequestError: (error) =>

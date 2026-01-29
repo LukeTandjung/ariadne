@@ -1514,16 +1514,42 @@ const resolveToolCalls = <Tools extends Record<string, Tool.Any>>(
 > => {
     const toolNames: Array<string> = [];
     const toolCalls: Array<Response.ToolCallPartEncoded> = [];
+    const mcpToolCalls: Array<Response.ToolCallPartEncoded> = [];
+
+    // Get local tool names from the toolkit to distinguish from MCP tools
+    const localToolNames = new Set(Object.keys(toolkit.tools));
 
     for (const part of content) {
         if (part.type === "tool-call") {
             toolNames.push(part.name);
-            if (part.providerExecuted === true) {
+            // Check if this is an MCP tool (provider-executed or not in local toolkit)
+            const isMcpTool =
+                part.providerExecuted === true ||
+                !localToolNames.has(part.name);
+            if (isMcpTool) {
+                // Track MCP tools to create synthetic results
+                mcpToolCalls.push(part);
                 continue;
             }
             toolCalls.push(part);
         }
     }
+
+    // Create synthetic tool-result parts for MCP tools so the conversation
+    // has matching tool-call/tool-result pairs (required for valid prompts)
+    const mcpResults = mcpToolCalls.map((toolCall) =>
+        Response.makePart("tool-result", {
+            id: toolCall.id,
+            name: toolCall.name as any,
+            result: "[Executed by provider]",
+            encodedResult: "[Executed by provider]",
+            isFailure: false,
+            providerExecuted: true,
+            ...(toolCall.providerName !== undefined
+                ? { providerName: toolCall.providerName }
+                : {}),
+        }),
+    );
 
     return Effect.forEach(
         toolCalls,
@@ -1545,7 +1571,7 @@ const resolveToolCalls = <Tools extends Record<string, Tool.Any>>(
             );
         },
         { concurrency },
-    );
+    ).pipe(Effect.map((localResults) => [...mcpResults, ...localResults] as any));
 };
 
 // =============================================================================
