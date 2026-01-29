@@ -1,5 +1,11 @@
 # @luketandjung/ariadne
 
+## 2.1.4
+
+### Patch Changes
+
+- 76c055e: version bump
+
 ## 2.1.3
 
 ### Patch Changes
