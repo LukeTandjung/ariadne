@@ -1,5 +1,13 @@
 # @luketandjung/dedalus-labs
 
+## 2.1.3
+
+### Patch Changes
+
+- dea2269: version bump to force npm to republish
+- Updated dependencies [dea2269]
+  - @luketandjung/ariadne@2.1.3
+
 ## 2.1.2
 
 ### Patch Changes
