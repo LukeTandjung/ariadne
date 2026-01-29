@@ -1,5 +1,14 @@
 # @luketandjung/dedalus-labs
 
+## 2.1.2
+
+### Patch Changes
+
+- 547a74e: fixed MCP streaming
+- Updated dependencies [a153e9c]
+- Updated dependencies [547a74e]
+  - @luketandjung/ariadne@2.1.2
+
 ## 2.1.1
 
 ### Patch Changes

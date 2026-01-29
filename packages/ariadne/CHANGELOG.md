@@ -1,5 +1,12 @@
 # @luketandjung/ariadne
 
+## 2.1.2
+
+### Patch Changes
+
+- a153e9c: patched mcp servers to use generic fallback schema when validating
+- 547a74e: fixed MCP streaming
+
 ## 2.1.1
 
 ### Patch Changes
